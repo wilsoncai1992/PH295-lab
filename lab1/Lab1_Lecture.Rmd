@@ -1,0 +1,283 @@
+---
+title: "Intro to R"
+author: "David Benkeser"
+date: "August 31, 2016"
+output:
+  html_document:
+    toc: true
+    theme: journal
+    highlight: haddock
+---
+## I. Introduction
+
+This document provides a short introduction to some `R` functions that will be needed for the first lab assignment and later through out the course. 
+
+## II. Simulating data
+
+A big part of what we statisticians do is based on simulating data. You just came up with a method that, in theory, is brilliant/elegant/the-best-thing-since-sliced-bread, but you need to illustrate that the method actually works well in practice. For example, your theoretical results may be based on the assumption of a large sample size and you want to investigate how well the method performs when the sample size is modestly small. Providing such information can help convince readers that your method is in fact a good idea. Simulations can also be helpful for showing when a method breaks down, which is something reviewers also like to see. 
+
+To accomplish these tasks, we need to create a data generating experiment where we know the truth so that we can benchmark our method by it. Let's start with a very simple example. Our simulated experiment enrolls `n=100` subjects and measures an outcome $Y$ on each subject. Suppose that we want to know how our method performs when $Y \sim N(0,1)$. 
+```{r}
+# simulate 100 draws from a normal distribution.
+Y <- rnorm(n = 100, mean = 0 , sd = 1)
+
+# look at the first 10 entries of Y
+head(Y, 10)
+
+# look at the last 10 entries of Y
+tail(Y, 10)
+
+# get a few summary statistics of Y
+summary(Y)
+
+# plot a histogram of Y
+hist(Y)
+```
+
+The above code chunk illustrates several important `R` functions. First is `rnorm`, which simulates `n` observations from a standard Normal distribution with `mean = 0` and standard deviation `sd = 1`. We also illustrated several functions that are useful for ensuring that the data were created properly. The functions `head` and `tail` can be used to look at the first and last entries of an object, `summary` provides several basic statistics about an object, and `hist` plots a histogram of the object. 
+
+There are other distributions we might want to simulate from as well.
+```{r}
+# simulate 100 draws from a uniform(0,1) distribution
+Y.unif <- runif(n = 100, min = 0, max = 1)
+
+# simulate 100 draws from a bernoulli(0.5) distribution
+# recall that a bernoulli(p) distribution is just a binomial(n=1,p)
+Y.bern <- rbinom(n = 100, size = 1, prob = 0.5)
+
+# simulate 100 draws from a gamma(1,2) distribution
+Y.gamma <- rgamma(n = 100, shape = 1, scale = 2)
+```
+`R` has several other functions for simulating data from various distributions. Additionally many packages have been constructed for simulating data from other distributions. Googling "how to simulate from XYZ distribution" will likely be sufficient to figure what package/functions you will need. 
+
+Often, our experiment measures more than a single variable on each unit, so we might want to write a function that returns `n` copies of $O = (W,A,Y)$. Suppose that $O$ is distributed as follows
+
+$$ W \sim Uniform(0,1) $$
+$$ A \sim Bernoulli(expit[-1 + W]) $$
+$$ Y \sim Normal(W + A, 1/2) $$
+
+We can now write a function that takes as input `n` and returns a `data.frame` object with rows corresponding to observations $O$ and columns corresponding to $W, A, Y$.
+```{r}
+
+# define a function that takes as input n (a numeric)
+makeO <- function(n){
+    W <- runif(n, min = 0, max = 1)
+    # plogis is the pdf of the logistic distribution and 
+    # plogis(x) = expit(x) = exp(x)/(1+exp(x))
+    A <- rbinom(n, size = 1, prob = plogis(-1 + W))
+    Y <- rnorm(n, mean = W + A, sd = sqrt(1/2))
+    
+    # return a data.frame object with named columns W, A, Y
+    return(data.frame(W=W, A=A, Y=Y))
+}
+
+# make a data set with 100 observations
+dat <- makeO(100)
+
+# confirm that makeO() returned a data.frame object
+class(dat)
+
+# check the class of the Y column of dat
+class(dat$Y)
+
+# look at the first and last observations
+head(dat)
+tail(dat)
+
+# summary can be used to return summary statistics for each column in the data.frame
+summary(dat)
+
+# or we can use summary to return summary statistics for a given column
+summary(dat$Y)
+```
+
+Notice that in our function, we specified the vector `W` as above. However, when we generated `A`, rather than giving the `prob` argument of the `rbinom` function a numeric, we gave it a vector `plogis(-1 + W)`. The function is smart enough to know that when we give it a scalar argument for `size`, but a vector argument for `prob`, we mean that we want all `n` objects to be random draws from a binomimal distribution with `size = 1`, but whose probabilities vary according to the vector `plogis(-1 + W)`. 
+
+Our function returned a `data.frame` object. These objects in `R` can be useful for interfacing with certain functions like `glm`, that we'll meet in a minute. These objects consist of named vectors of the same length that are stored as columns. Using the `$` operator accesses the a named attribute of the object. 
+
+We conclude this section with a quick statement of a fact that may be obvious but bears mention. We have not idiot-proofed the function `makeO`. That is, the function expects a numeric input `n` and if we give it something crazy, the results will be unexpected. 
+```{r, error=TRUE}
+makeO(n = "something crazy")
+```
+Above, the function tried to pass the character object `n` into `runif`, which threw an error. If only you will ever use your function, it may not be worth your time to include sanity checks; however, if others will use your function, it may be worth it to program some checks of function inputs and throw errors if input is unexpected. Here's an example.
+```{r, error=TRUE}
+
+# define a function that takes as input n (a numeric)
+makeSaneO <- function(n){
+    # check whether n is of class numeric
+    if(class(n) != "numeric"){
+        stop("n is not numeric. Can't simulate data.")
+    }
+    W <- runif(n, min = 0, max = 1)
+    # plogis is the pdf of the logistic distribution and 
+    # plogis(x) = expit(x) = exp(x)/(1+exp(x))
+    A <- rbinom(n, size = 1, prob = plogis(-1 + W))
+    Y <- rnorm(n, mean = W + A, sd = sqrt(1/2))
+    
+    # return a data.frame object with named columns W, A, Y
+    return(data.frame(W=W, A=A, Y=Y))
+}
+
+makeSaneO(n = "something crazy")
+```
+
+
+## III. Fitting basic GLMs
+
+The first lab assignment asks you to fit several [generalized linear models](https://en.wikipedia.org/wiki/Generalized_linear_model). A generalized linear model for an observation $O=(W,A,Y)$ assumes that the conditional distribution of $Y$ given $A, W$ has some parameteric distribution (typically one from the Exponential Family) and that the conditional mean of $Y$ given $A,W$ can be written as
+
+$$ g[E(Y | A, W)] = \beta_0 + \beta_1 A + \beta_2 W  \ . $$
+
+There is typically a choice of the link function $g()$ that is associated with a particular parametric family; this is known as the canonical link function. For example, when $Y \in \{0,1\}$ we assume that $Y$ is Bernoulli distribution with $g(x) = log[x/(1-x)]$ -- also known as the logit link function. `R` has so-called `family` objects built in that can identify these relationships.
+```{r}
+# for logisitic regression
+binomial()
+# for linear regression
+gaussian()
+# for poisson regression
+poisson()
+# for Gamma regression (make sure G is capital!)
+Gamma()
+```
+
+The unknown parameters of a GLM are typically estimated via maximum likelihood, which can be achieved in `R` through the use of the `glm` function. Below, we illustrate a couple different ways to call `glm`. 
+```{r}
+# we'll use our data.frame object dat from before to fit the
+# linear regression Y = \beta_0 + \beta_1 A + \beta_2 W
+
+# first we can specify a formula and a data.frame object 
+fm1 <- glm(formula = "Y ~ A + W", data=dat, family=gaussian())
+
+# check the class
+class(fm1)
+
+# print the results
+fm1
+
+# summarize the results
+summary(fm1)
+
+# we can also only vectors and no data.frame object
+fm2 <- glm(formula = "dat$Y ~ dat$A + dat$W", family=gaussian())
+fm2
+```
+
+The function `glm` is pretty idiot proof and I'll refer you to the manual to get any more information on the various ways to call the function. Here\'s a short example of fitting a logistic regression. 
+```{r}
+# define a function that takes as input n (a numeric)
+# and returns n copies of O=(W, A, Y) where Y \in \{0,1\}
+makeBinaryO <- function(n){
+    W <- runif(n, min = 0, max = 1)
+    # plogis is the pdf of the logistic distribution and 
+    # plogis(x) = expit(x) = exp(x)/(1+exp(x))
+    A <- rbinom(n, size = 1, prob = plogis(-1 + W))
+    # now Y is binary
+    Y <- rbinom(n, size = 1, prob = plogis(-1 + W + A))
+    
+    # return a data.frame object with named columns W, A, Y
+    return(data.frame(W=W, A=A, Y=Y))
+}
+
+datBin <- makeBinaryO(n = 100)
+
+# fit logistic regression by calling glm with family=binomial()
+fm3 <- glm("Y ~ A + W", data=datBin, family=binomial())
+```
+
+The `summary.glm` method returns Wald-style tests that the estimated regression parameters are equal to zero. Let\'s figure out how to access those values. 
+```{r}
+# store the summary of fm3
+fm3Sum <- summary(fm3)
+
+# print the summary
+fm3Sum
+
+# check it's class
+class(fm3Sum)
+
+# check it's named components
+names(fm3Sum)
+
+# the table of estimated parameters, std. errors, and p-values is stored
+# in the $coefficients object
+coef.fm3Sum <- fm3Sum$coefficients
+
+# which we see is a matrix object
+class(coef.fm3Sum)
+
+# we can access different rows and columns of the matrix using brackets
+# the intercept is the [1,1] entry in the matrix
+cat("The intercept is ", coef.fm3Sum[1,1])
+
+# the p-value for the coefficient associated with A is the [2,4] entry
+cat("The Wald p-value for A is ", coef.fm3Sum[2,4])
+```
+
+
+## IV. Simulation basics
+We now have all the components we need to execute a basic simulation. In frequentist statistics, we care a lot about what happens to a given summary measure of data (i.e., a statistic) over repeated experiments. Whereas in real life, we typically only get data from one or two repeated experiments where we don't know the real answer, in simulations we can generate many, many experiments where we do know the answer. 
+
+Suppose we are interested in the power of a statistical test. That is, if the null hypothesis is not true, what is the probability (i.e., proportion of times over repeated experiments) that we correctly reject the null hypothesis. Below, we define a couple functions that we will combine into a function that executes one simulation (i.e., one analysis for one data set). 
+
+```{r}
+# a function that takes as input 'fm', a glm object and returns whether
+# or not the p-value for the coefficient associated with A is 
+# rejected at the 0.05 level
+isNullRejected <- function(fm){
+    sumFm <- summary(fm)
+    pVal <- sumFm$coefficients["A","Pr(>|z|)"]
+    return(pVal < 0.05)
+}
+
+
+# a function that takes as input 'n', a scalar, simulates a data set
+# using makeBinaryO, estimates a main-terms glm and determines whether 
+# the coefficient associated with A is rejected at the 0.05 level
+doOneSim <- function(n){
+    # make data set
+    dat <- makeBinaryO(n = n)
+    # fit glm
+    fm <- glm("Y ~ A + W", data=dat, family=binomial())
+    # get hypothesis test result
+    out <- isNullRejected(fm)
+    # return
+    return(out)
+}
+
+# try it out
+doOneSim(n=100)
+```
+
+Now we need to do this a large number of times. There are many ways to do this, a couple illustrated below. First, we start with a basic `for` loop. 
+```{r}
+# number of simulations, in general more is better to decrease
+# the Monte Carlo error in your answer (i.e., error due to random seed used)
+nSim <- 100
+
+# let's set a seed so the results are reproducible
+set.seed(1234)
+
+## get results using a for() loop
+# create empty vector of length nSim that results will go into
+outVec <- rep(NA, nSim)
+for(i in 1:nSim){
+    outVec[i] <- doOneSim(n = 100)
+}
+
+# check out first and last results
+head(outVec) 
+tail(outVec)
+
+# power is the average number of times you reject the null
+cat("The power of the test is " , mean(outVec))
+```
+
+Next we use `R`'s built in function `replicate`. This function repeatedly evaluates `expr` a total of `n` times and stores the output. It\'s exactly like a `for` loop, but with shorter syntax. 
+```{r}
+# again set a seed so reproducible
+set.seed(1234)
+# replicate
+outRep <- replicate(n = nSim, expr = doOneSim(n=100))
+
+cat("The power of the test is " , mean(outRep))
+```
