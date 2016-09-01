@@ -1,0 +1,87 @@
+---
+title: "Classic Statistics"
+author:
+- David Benkeser & Wilson Cai
+- Department of Biostatistics, UC Berkeley
+date: "2016-08-31"
+output:
+  html_document:
+    toc: true
+    theme: journal
+    highlight: haddock
+---
+
+## I. Model misspecification
+The first exercise illustrates the effect of misspecification of a parametric model on inference about the effect of a treatment $A$ on an outcome $Y$. Consider the setting that the observed data consist of $n$ i.i.d. copies of $O = (W,A,Y)$, where
+$$W \sim Uniform\left( {0,1} \right)$$
+
+$$A \sim  Bernoulli(expit[1/12 + (W - 1/2)^2])$$
+
+$$Y \sim Bernoulli(expit[(W - 1/2)^2)]) \ , $$
+
+where $expit(x) = exp(x)/[1+exp(x)]$. 
+
+Suppose we are interested in the parameter
+$$ \psi_0(W) = \frac{P(Y=1 | A=1, W)/[1-P(Y=1 | A=1, W)]}{P(Y=1 | A=0, W)/[1-P(Y=1 | A=0, W)]} \ , $$
+which is the ratio of the odds of the outcome $Y$ comparing $A=1$ to $A=0$ conditional on $W$. Suppose we know that this parameter is actually constant in 
+$W$ so we can write $\psi_0 = \psi_0(W)$. 
+
+Your "Statistics for Dummies" book recommends you use a main terms logistic
+regression model, which assumes that 
+
+$$ P(Y=1 | A, W) = expit[\beta_0 + \beta_1 A + \beta_2 W ] $$
+
+for some unknown parameter $\beta = (\beta_0, \beta_1, \beta_2)$. 
+
+1. Show that if the assumed logistic regression model is true then $\psi_0 = exp(\beta_1)$. 
+
+2. The logistic regression model is in fact incorrect, so what is the true value of $\psi_0$?
+
+3. What is the value of $\beta_{1,0}$, the limit of the maximum likelihood estimator $\beta_{1,n}$ of $\beta_1$? (numerical approximation is ok)
+
+4. Design a simulation study to determine the type-1 error of the nominal level $0.05$ Wald-style test of the null hypothesis that $\psi_0 = 1$ that rejects the null hypothesis whenever $|\beta_{1,n}/\hat{se}_{\beta,1,n}| > 1.96$ (the default test performed by `glm`). Assess the type-1 error at sample sizes $n=100,1000,10000$. 
+
+5. Comment on your findings. 
+
+## II. Post-selection inference
+In a 2001 paper that appeared in the Journal of Health Economics (that has been cited 1,398 times according to Google), Manning and Mullahy argue for the following algorithm for choosing a GLM when analyzing outcomes with a skewed distribution:
+
+- Estimate the parameters of a main terms regression on the log-transformed values $E[log(Y) | A, W] = \beta_0 + \beta_1 A + \beta_2 W$ using maximum likelihood. 
+
+- Compute the residual from this regression 
+$$ \varepsilon_{1,i} = log(Y_i) - (\beta_{0,n} + \beta_{1,n} A_i + \beta_{2,n} W_i) $$
+
+- (slightly simplified from original paper) If the sample kurtosis of the residuals (see `kurtosis` from the `moments` package) is $>3$, report inference for $\beta_{1,n}$. 
+
+- If the kustosis of the residuals is $\le 3$, fit a linear regression 
+$$ E(Y | A,W) = \alpha_0 + \alpha_1 A + \alpha_2 W \ . $$
+
+- Compute the residual from this regression 
+$$ \varepsilon_{2,i} = Y_i - \hat{Y}_i = Y_i - (\alpha_{0,n} + \alpha_{1,n} A_i + \alpha_{2,n} W_i) $$
+
+- Using this residual, fit the following linear regression model:
+$$ E(\varepsilon_{2,i}^2 | \hat{Y}) = \lambda_0 + \lambda_1 log(\hat{Y}) $$
+That is, regress the squared residuals from the raw-scale regression on the log-transformed predicted values from the raw-scale regression. 
+
+- (slightly simplified from original paper) If $\lambda_{1,n} < 1.5$, fit a `glm` with `family = possion(link="log")`; if $1.5 \le \lambda_{1,n} < 2.5$ fit a `glm` with `family = Gamma(link="log")`; if $\lambda_{1,n} > 2.5$ fit a `glm` with `family = inverse.gaussian(link="log")`. 
+
+- Report the inference associated with the $A$-coefficient in the selected GLM. 
+
+Note: You may need to add some stability checks to make this algorithm run smoothly for all of these choices of `family`. You are welcome to use any method you like; just report what you chose. One example could be to include checking for model convergence (i.e., `glm.object$converged`) and if not report inference on log-transformed scale. 
+
+The authors show simulations illustrating this algorithm leads to increases in bias and variance over choosing a single model when the regression formula is correctly specified. They go on to report inference based on the final model for real data examples without a discussion of how model selection may affect inference. Your task is to evaluate the effect of this model selection through simulation. 
+
+Consider data generated as follows: 
+$$ W_1 \sim Uniform(-4, 4)$$
+$$ W_2 \sim Bernoulli(1/2)$$
+$$ A \sim Bernoulli(expit[-2 + W_1/2 + W_2 + W_1 W_2/4]) $$
+$$ log(Y) \sim Normal(5 + \psi A + W_1 + W_2 - W_1 W_2 - W_1^2/8, 1)$$  
+
+1. Set $\psi = 0$ so $A$ has no effect on $Y$. Evaluate the type-1 error of the hypothesis test that rejects whenever the p-value associated with 
+the Manning algorithm-selected model is less than 0.05. First, consider the case where the regression formula is correctly specified (i.e., your `glm` uses `formula = Y ~ A + W1*W2 + I(W1^2)`) for sample sizes $n \in \{100, 500, 1000\}$. 
+
+2. Repeat question 1 using the incorrect main terms regression `formula = Y ~ A + W1 + W2` in your calls to `glm`. 
+
+3. Use the above data generating mechanism for $W_1$, $W_2$, and $Y$, but now suppose that $A \sim Bernoulli(1/2)$. Using simulations, assess the probability of rejecting the null hypothesis of no treatment effect for all combinations of  $\psi \in \{0, 0.05, 0.1, 0.25, 0.5\}$ and $n \in \{100, 500, 1000\}$. Compare these probabilities to the probability of rejecting the null hypothesis using a simple two-sample t-test with unequal variances (i.e., reject when `t.test(Y~A)$p.value < 0.05`). 
+
+4. Comment on your findings. What can you conclude about inference based on an adaptively-selected GLM in an obersvational study? What can you conclude about inference based on an adaptively-selected GLM in a randomized trial?
