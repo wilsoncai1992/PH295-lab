@@ -1,0 +1,175 @@
+\documentclass[10pt]{article}
+\usepackage[latin1]{inputenc}    % Accept european-encoded (latin1) characters.
+\usepackage[top=1in, bottom=1in, left=.75in, right=.75in]{geometry}
+%\usepackage{a4wide}              % Wide paper
+\usepackage[parfill]{parskip}    % skip a line instead of indenting new paragraphs
+\usepackage{graphicx}   % For eps figures
+\usepackage{epsfig}     % Alternative package
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+
+\usepackage{fancyhdr}
+\fancyhead[L]{\assignment }
+\fancyhead[R]{\class \;- \author }
+\renewcommand{\footrulewidth}{0.5pt} % Insert a line above the footer
+\pagestyle{fancy}
+\usepackage[hang,small,bf]{caption}
+\usepackage{palatino}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{esint}
+\usepackage{multicol}
+\usepackage{enumitem}
+
+\usepackage{verbatim}
+\usepackage{fancyvrb}
+
+\newcommand\independent{\protect\mathpalette{\protect\independenT}{\perp}}
+\def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
+
+% convenience commands
+\renewcommand{\author}{Wilson-269xxxxx}
+\newcommand{\class}{PH 295}
+\newcommand{\instructor}{Professor Mark van der Laan}
+\newcommand{\assignment}{Homework 1}
+
+\newcounter{prob_num}
+\setcounter{prob_num}{1}
+
+% usage: \problem
+\newcommand{\problem}{\textbf{Question \arabic{prob_num}.}\stepcounter{prob_num}  }
+% ------------------------------------------------------------------------------
+% WILSON:
+\newcommand{\pf}[1]{~\newline\textbf{Proof: (#1)}}
+\newcommand{\imp}{\\$\implies$}
+\newcommand{\iff}{\\$\iff$}
+
+\newcount\colveccount
+\newcommand*\colvec[1]{
+        \global\colveccount#1
+        \begin{pmatrix}
+        \colvecnext
+}
+\def\colvecnext#1{
+        #1
+        \global\advance\colveccount-1
+        \ifnum\colveccount>0
+                \\
+                \expandafter\colvecnext
+        \else
+                \end{pmatrix}
+        \fi
+}
+
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{properties}{Properties}
+\newtheorem{example}{Example}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{observation}{Observation}
+
+\def \endprf{\hfill {\vrule height6pt width6pt depth0pt}\medskip}
+\newenvironment{proof}{\noindent {\bf Proof} }{\endprf\par}
+
+\newcommand{\R}{{\mathbb R}}
+\newcommand{\Z}{{\mathbb Z}}
+\newcommand{\Q}{{\mathbb Q}}
+\newcommand{\C}{{\mathbb C}}
+\newcommand{\N}{{\mathbb N}}
+\newcommand{\pr}{\text{prox}_P}
+\newcommand{\E}{{\mathbb E}}
+\newcommand{\A}{\mathcal{A}}
+\newcommand{\K}{\mathcal{K}}
+\renewcommand{\H}{\mathbb{H}}
+\renewcommand{\P}{\mathbb{P}}
+\newcommand{\U}{\mathcal{U}}
+\newcommand{\B}{\mathcal{B}}
+\newcommand{\supp}{\text{supp}}
+\newcommand{\Ball}{\mathbb{B}_2^d(1)}
+\newcommand{\sBall}{\mathbb{B}_2^d(10 \delta)}
+\newcommand{\vol}{\text{vol}}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\renewcommand{\S}{\mathbb{S}}
+% ------------------------------------------------------------------------------
+% usage: \head{name}{class}{assignment}
+\newcommand{\head}{\begin{center}\begin{tabular*}{\linewidth}{l@{\extracolsep{\fill}}r}\author & \class\; \instructor\\ \today & \assignment\end{tabular*}\end{center} \hfill }
+% usage: \eqn{equation}{label}
+\newcommand{\eqn}[2]{\begin{equation}#1\label{#2}\end{equation}}
+\newcommand{\E}{\mathbb{E}} %Expectation
+\newcommand{\p}{\mathbb{P}} %Probability
+\newcommand{\I}{\mathbb{I}} %Indicator
+\newcommand{\V}{\text{Var}} %Variance
+\newcommand{\tr}{\text{tr}} %trace
+\newcommand{\N}{\mathcal{N}} %Natural numbers
+\renewcommand{\L}{\mathcal{L}} %Likelihood: for log likelihood use \ell
+\renewcommand{\P}{\text{Pr}} %Probability
+\newcommand{\prodn}{\displaystyle\prod_{i=1}^n} %Product from 1 to n
+\newcommand{\sumn}{\displaystyle\sum_{i=1}^n} %Sum from 1 to n
+
+% begin document
+\begin{document}
+\head
+
+% ------------------------------------------------------------------------------
+\problem
+\begin{enumerate}[label=(\roman*)]
+\item
+\pf{sufficiency}
+
+\pf{completeness}
+
+
+
+
+\item
+% \begin{align*}
+
+
+
+\item
+
+\end{enumerate}
+% ------------------------------------------------------------------------------
+\problem
+\begin{enumerate}[label=(\roman*)]
+\item
+\item
+\item
+\item
+\item
+\item
+\item
+
+
+\end{enumerate}
+% ------------------------------------------------------------------------------
+\problem
+\begin{enumerate}[label=(\roman*)]
+\item
+\item
+\item
+
+
+\end{enumerate}
+
+% ------------------------------------------------------------------------------
+\problem
+\begin{enumerate}[label=(\roman*)]
+\item
+\item
+\item
+
+
+\end{enumerate}
+
+
+
+
+
+
+
+\end{document}
