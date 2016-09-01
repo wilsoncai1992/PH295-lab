@@ -281,3 +281,107 @@ outRep <- replicate(n = nSim, expr = doOneSim(n=100))
 
 cat("The power of the test is " , mean(outRep))
 ```
+
+
+## V. Other tricks and tools needed for the first lab assignment
+
+Kurtosis is a measure of how heavy the tails of a distribution can be. A function to compute this measure is found in the `moments` package. 
+```{r}
+# simulate some log-normal data
+logY <- rnorm(n = 100, mean = 0, sd = 1)
+Y.lognorm <- exp(logY)
+
+# calculate kurtosis
+library(moments)
+
+kurtosis(Y.lognorm)
+
+# or you can use the actual formula
+n <- length(Y.lognorm)
+Y.lognorm.bar <- mean(Y.lognorm)
+
+(1/n * sum((Y.lognorm - Y.lognorm.bar)^4))/(1/n  * sum((Y.lognorm - Y.lognorm.bar)^2))^2
+```
+
+`if` statements will also be helpful. Here I write a function that simulates `n` values for $Y$ from a log-normal distribution and $n$ values for $X$ from a uniform distribution. It then checks the kurtosis. If the kurtosis is $>$ 10, I fit a normal GLM; otherwise I fit a log-transformed GLM. I'll also print a message to say which one it's fitting
+```{r}
+myGLM <- function(n){
+    # simulate n log-normal observations
+    logY <- rnorm(n = n, mean = 0, sd = 1)
+    Y.lognorm <- exp(logY)
+    
+    # simulate x
+    X <- runif(n)
+    
+    # get kurtosis 
+    k <- kurtosis(Y.lognorm)
+
+    if(k > 10){
+        cat("I'm fitting untransformed GLM")
+        fm <- glm(Y ~ X)
+    }else{
+        cat("I'm fitting log-transformed GLM")
+        # you can use the I() notation in glm formula to do a 
+        # transformation of the variable before the regression is fit
+        fm <- glm(logY ~ X)
+    }
+    # return the glm object
+    return(fm)
+}
+
+# run the function
+myGLM(100)
+```
+
+It will also be helpful to get predictions back from fit `glm` objects. This can be accomplished as follows.
+```{r}
+# simulate some data
+logY <- rnorm(n = 100, mean = 0, sd = 1)
+Y.lognorm <- exp(logY)
+X <- runif(n = 100)
+
+# make a data.frame
+dat <- data.frame(Y=Y.lognorm, X=X)
+
+# fit a glm
+fm <- glm(Y ~ X, data=dat)
+
+# the fitted values are already stored in fm
+fitted <- fm$fitted.values
+
+# as our the residuals
+resid <- fm$residuals
+
+# plot resid vs. fitting
+plot(resid ~  fitted)
+
+# we could also get predictions back via the predict method
+fitted2 <- predict(fm)
+
+# and make our own residuals
+resid2 <- dat$Y - fitted2
+
+# which should all be the same as resid
+all(resid==resid2)
+```
+
+Also note that you can use `glm` to fit with non-canonical link functions as follows. 
+```{r}
+# fit a gamma GLM
+fmGamma <- glm(Y ~ X, data=dat, family=Gamma(link="log"))
+
+# the algorithm used to fit glm sometimes doesn't work with
+# non-canonical link functions, so we might want to check
+# whether the fitting algorithm converged
+fmGamma$converged
+
+# another way to make things more stable is to add sane values
+# for starting coefficients, e.g., maybe the geometric mean of Y for
+# the intercept and 0 for the X coefficient. sometimes even just setting
+# starting value of 0 for all parameters can help.
+gMeanY <- exp(mean(log(dat$Y)))
+
+fmGamma <- glm(Y ~ X, data=dat, family=Gamma(link="log"),
+               start = c(gMeanY,0))
+fmGamma
+```
