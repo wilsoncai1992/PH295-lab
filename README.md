@@ -2,9 +2,18 @@
 
 ## Schedule
 
-- Week 1: Intro to R
-- Week 2: Make-up Lecture 2
-- Week 3: Guest speaker 1 (Oleg Sofrygin) -- `simcausal`
+- Lab 1: Intro to R
+- Lab 2: Make-up Lecture 2
+- Lab 3: Guest speaker 1 (Oleg Sofrygin) -- `simcausal`
+- Lab 4: TBA
+- Lab 5: TBA
+- Lab 6: TBA
+- Lab 7: TBA
+- Lab 8: TBA
+- Lab 9: TBA
+- Lab 10: TBA
+- Lab 11: TBA
+- Lab 12: TBA
 
 
 ## License
