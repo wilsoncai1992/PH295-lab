@@ -1,19 +1,20 @@
-# PB HTLH 295: Big Data Seminar Lab material
+# PB HTLH 295: Big Data Seminar Week material
 
 ## Schedule
 
-- Lab 1: Intro to R
-- Lab 2: Make-up Lecture 2
-- Lab 3: Guest speaker 1 (Oleg Sofrygin) -- `simcausal`
-- Lab 4: TBA
-- Lab 5: TBA
-- Lab 6: TBA
-- Lab 7: TBA
-- Lab 8: TBA
-- Lab 9: TBA
-- Lab 10: TBA
-- Lab 11: TBA
-- Lab 12: TBA
+- Week 1: No Lab
+- Week 2: Intro to R
+- Week 3: Make-up Lecture 2
+- Week 4: Guest speaker 1 (Oleg Sofrygin) -- `simcausal`
+- Week 5: TBA
+- Week 6: TBA
+- Week 7: TBA
+- Week 8: TBA
+- Week 9: TBA
+- Week 10: TBA
+- Week 11: TBA
+- Week 12: TBA
+- Week 13: TBA
 
 
 ## License
