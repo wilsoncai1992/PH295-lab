@@ -53,15 +53,16 @@ $$ \varepsilon_{1,i} = log(Y_i) - (\beta_{0,n} + \beta_{1,n} A_i + \beta_{2,n} W
 
 - (slightly simplified from original paper) If the sample kurtosis of the residuals (see `kurtosis` from the `moments` package) is $>3$, report inference for $\beta_{1,n}$. 
 
-- If the kustosis of the residuals is $\le 3$, fit a linear regression 
-$$ E(Y | A,W) = \alpha_0 + \alpha_1 A + \alpha_2 W \ . $$
+- If the kustosis of the residuals is $\le 3$, fit a linear regression with log 
+link: 
+$$ E(Y | A,W) = exp(\alpha_0 + \alpha_1 A + \alpha_2 W ) \ . $$
 
 - Compute the residual from this regression 
-$$ \varepsilon_{2,i} = Y_i - \hat{Y}_i = Y_i - (\alpha_{0,n} + \alpha_{1,n} A_i + \alpha_{2,n} W_i) $$
+$$ \varepsilon_{2,i} = Y_i - \hat{Y}_i = Y_i - exp(\alpha_{0,n} + \alpha_{1,n} A_i + \alpha_{2,n} W_i) $$
 
-- Using this residual, fit the following linear regression model:
-$$ E(\varepsilon_{2,i}^2 | \hat{Y}) = \lambda_0 + \lambda_1 log(\hat{Y}) $$
-That is, regress the squared residuals from the raw-scale regression on the log-transformed predicted values from the raw-scale regression. 
+- Using this residual, fit the following linear regression model with log-link:
+$$ E(\varepsilon_{2,i}^2 | \hat{Y})= exp\{\lambda_0 + \lambda_1 log(\hat{Y})\} $$
+That is, using a normal GLM with log link, regress the squared residuals from the raw-scale regression on the log-transformed predicted values from the raw-scale regression. 
 
 - (slightly simplified from original paper) If $\lambda_{1,n} < 1.5$, fit a `glm` with `family = possion(link="log")`; if $1.5 \le \lambda_{1,n} < 2.5$ fit a `glm` with `family = Gamma(link="log")`; if $\lambda_{1,n} > 2.5$ fit a `glm` with `family = inverse.gaussian(link="log")`. 
 
