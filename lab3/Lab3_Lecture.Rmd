@@ -1,0 +1,421 @@
+---
+title: "Structural Causal Models and Parameters"
+author: "David Benkeser"
+date: "September 20, 2016"
+output:
+  html_document:
+    toc: true
+    theme: journal
+    highlight: haddock
+---
+## I. Introduction
+
+In this lab, we review how to simulate from structural causal models (SCMs) and how to approximate causal parameters based on SCMs. We also illustrate how to compare causal parameters to observed data parameters to verify identifiability results discussed in class. 
+
+## II. Average Treatment Effect
+Consider the data structure $X = (W_1,W_2,A,Y)$ and $U = (U_{W,1}, U_{W,2},U_{A},U_Y)$. The first exercise will show how to explicitly simulate data from a structural model. Our causal model stipulates that $(U,X) \sim P_{U,X}$ for some $P_{U,X} \in \mathcal{M}^X$, a model that assumes that $U_A \perp U_Y$, but otherwise makes no assumptions about the distribution of $(U,X)$. One (of many) such $P_{U,X}$ that is in this model is given by the error distributions \begin{align*}
+U_{W,1} &\sim \mbox{Bernoulli}(1/2) \\
+U_{W,2} &\sim \mbox{Bernoulli}(1/2) \\
+U_A &\sim \mbox{Normal}(0,1) \\
+U_Y &\sim \mbox{Normal}(0,1) \ ,
+\end{align*}
+and structural equations \begin{align*}
+f_{W,1}(U_{W,1}) &= U_{W,1} \\
+f_{W,2}(U_{W,2}) &= U_{W,2} \\
+f_A(W_1, W_2, U_A) &= I(\mbox{expit}(W_1 - W_2 + U_A) > 0.5)\\
+f_Y(W_1, W_2, A, U_Y) &= -W_1 + W_2 + A - U_Y \ . 
+\end{align*}
+
+Let's think about how we can explicity code this distribution in R. Let's first write a function to represent each structural equation.
+
+```{r}
+# structural equation for W_1
+# takes as input a vector U_W1 and returns a vector evaluating
+# f_{W,1}(U_W1)
+f_W1 <- function(U_W1){
+    return(U_W1)
+}
+
+# structural equation for W_2
+# takes as input a vector U_W2 and returns a vector evaluating
+# f_{W,2}(U_W2)
+f_W2 <- function(U_W2){
+    return(U_W2)
+}
+
+# structural equation for A
+f_A <- function(W_1, W_2, U_A){
+    return(as.numeric(plogis(W_1 - W_2 + U_A) > 0.5))
+}
+
+# structural equation for Y
+f_Y <- function(W_1, W_2, A, U_Y){
+    return(-W_1 + W_2 + A - U_Y)
+}
+```
+We can now define a function to generate an observation from this SCM. 
+
+```{r}
+# function to draw n observations from an scm
+# n = the number of observations to draw
+# returns a data.frame with named columns
+simObsSCM <- function(n){
+    ## first we draw the errors
+    # draw U_{W,1}
+    U_W1 <- rbinom(n,1,0.5)
+    # draw U_{W,2}
+    U_W2 <- rbinom(n,1,0.5)
+    # draw U_A
+    U_A <- rnorm(n,0,1)
+    # draw U_Y
+    U_Y <- rnorm(n,0,1)
+
+    ## now we can evaluate the observations sequentially
+    # evaluate W_1
+    W_1 <- f_W1(U_W1)
+    #evaluate W_2
+    W_2 <- f_W2(U_W2)
+    # evaluate A
+    A <- f_A(W_1 = W_1, W_2 = W_2, U_A = U_A)
+    # evaluate Y
+    Y <- f_Y(W_1 = W_1, W_2 = W_2, A = A, U_Y = U_Y)
+
+    ## return a data.frame object
+    out <- data.frame(W_1 = W_1, W_2 = W_2, A = A, Y = Y)
+    return(out)
+}
+
+# try it out 
+test <- simObsSCM(n = 100)
+head(test)
+```
+The above function generates a set of $n$ observations that might be observed in pratice were this $P_{X,U}$ to be the true data generating distribution. Because we are simulating the data, we can also perform manipulations on this SCM, as we would like to (but may be unable to) do in practice. 
+
+Let's now define a function that allows us to set the value of $A$ to either 0 or 1 and returns a data set of counterfactual observations, i.e., observations we would have seen if we were able to manipulate the SCM. 
+
+```{r}
+# function that draws n observations from an SCM that is 
+# intervened on to set A = setA
+# n = number of observations
+# setA = the value to set A equal to (0 or 1)
+# returns a data.frame of coutnerfactual observations
+simIntSCM <- function(n, setA = 1){
+    ## first we draw the errors
+    # draw U_{W,1}
+    U_W1 <- rbinom(n,1,0.5)
+    # draw U_{W,2}
+    U_W2 <- rbinom(n,1,0.5)
+    # draw U_A
+    U_A <- rnorm(n,0,1)
+    # draw U_Y
+    U_Y <- rnorm(n,0,1)
+
+    ## now we can evaluate the observations sequentially
+    # evaluate W_1
+    W_1 <- f_W1(U_W1)
+    #evaluate W_2
+    W_2 <- f_W2(U_W2)
+    # we are now setting A = 1 for everyone
+    A <- rep(setA, n)
+    # evaluate Y with the set values of A
+    Y <- f_Y(W_1 = W_1, W_2 = W_2, A = A, U_Y = U_Y)
+
+    ## return a data.frame object
+    out <- data.frame(W_1 = W_1, W_2 = W_2, A = A, Y = Y) 
+    # lets rename the Y column to reflect the intervention
+    colnames(out)[4] <- paste0("Y_",setA)
+    return(out)
+}
+
+# try it out
+test1 <- simIntSCM(n = 100, setA = 1)
+head(test1)
+
+# and with setA = 0
+test0 <- simIntSCM(n = 100, setA = 0)
+head(test0)
+```
+
+Let's think about the distribution of the counterfactual random variables $Y_a, a = 0,1$ implied by an intervention on the SCM setting $A=a$. We can use a large sample to approximate this distribution and plot an approximation with a histogram. 
+
+```{r, cache= TRUE}
+# simulate a big data set from he SCM on which we intervened to set A = 0
+bigInt0 <- simIntSCM(n = 1e5, setA = 0)
+
+# plot the distribution of Y_0
+hist(bigInt0$Y_0,
+    main = expression("Distribution of "*Y[0]),
+    xlab = expression(Y[0]))
+
+# approximate the (counterfactual) mean of Y_0
+cfMeanY0 <- mean(bigInt0$Y_0)
+# add it to the graph 
+abline(v = cfMeanY0, col=2)
+text(x = cfMeanY0, y = par()$xpd[1], col=2, 
+    round(cfMeanY0,1),pos=4)
+
+# simulate a big data set from the SCM on which we intervened to set A = 1
+bigInt1 <- simIntSCM(n = 1e5, setA = 1)
+
+# plot the distribution of Y_1
+hist(bigInt1$Y_1,
+    main = expression("Distribution of "*Y[1]),
+    xlab = expression(Y[1]))
+
+# approximate the (counterfactual) mean of Y_1
+cfMeanY1 <- mean(bigInt1$Y_1)
+# add it to the graph 
+abline(v = cfMeanY1, col=2)
+text(x = cfMeanY1, y = par()$xpd[1], col=2, 
+    round(cfMeanY1,1),pos=4)
+```
+
+Consider computing the average treatment effect under $P_{U,X}$, $$
+\Psi_{cf}(P_{U,X}) = E_{P_{U,X}}\{ f_Y(w_1, w_2, 1, u_Y) - E_{P_{U,X}}\{f_Y(w_1, w_2, 0, u_Y) \} \ . 
+$$
+This quantity can be approximated using our simulated values as follows:
+```{r}
+cfMeanY1 - cfMeanY0
+```
+
+Now let's take a look at the distribution of the observed $Y$ implied by this SCM. In particular, let's consider the distribution of $Y$ conditional on $A=a$ for $a=0,1$. A conditional distribution is nothing more than the distribution of a variable in a subset of the population. Here that subset is defined by the observed treatment level. 
+
+```{r, cache = TRUE}
+# simulate large data set
+bigObs <- simObsSCM(n = 1e5)
+# plot a histogram of the conditional distribution of Y given A = 0 
+hist(bigObs$Y[bigObs$A == 0], 
+    main = "Conditional dist. of Y | A = 0",
+    xlab = "Y")
+# approximate the conditional mean of Y | A = 0 
+condMeanY0 <- mean(bigObs$Y[bigObs$A == 0])
+# add it to the graph
+abline(v = condMeanY0, col=2)
+text(x = condMeanY0, y = par()$xpd[1], col=2, 
+    round(condMeanY0,1),pos=4)
+
+# plot a histogram of the conditional distribution of Y given A = 1
+hist(bigObs$Y[bigObs$A == 1], 
+    main = "Conditional dist. of Y | A = 1",
+    xlab = "Y")
+# approximate the conditional mean of Y | A = 0 
+condMeanY1 <- mean(bigObs$Y[bigObs$A == 1])
+# add it to the graph
+abline(v = condMeanY1, col=2)
+text(x = condMeanY1, y = par()$xpd[1], col=2, 
+    round(condMeanY1,1),pos=4)
+```
+When we take the mean of the large ("infinite") data set we are approximating the parameter $$ 
+E_P(Y | A = a)
+$$
+with $$
+\frac{1}{N_a}\sum\limits_{i : A_i = a} Y_i \ ,
+$$
+where $N_a$ is the number of observations with $A=a$. If $n$ is chosen to be very large, this approximation should be very close to the true integral. 
+
+Consider the parameter that I'll call the "naive causal effect": $$
+\Psi_{naive}(P) = E_P(Y | A=1) - E_P(Y | A=0)
+$$
+Having evaluated the above code, we can approximate the value of the parameter at this particular $P$ as follows: 
+```{r}
+condMeanY1 - condMeanY0
+```
+We see that the naive causal effect does not equal the true causal effect even at this effectively infinite sample size. That is, the parameter $\Psi_{naive}$ does not identify $\Psi_{cf}$. This should come as no surprise, as we can see that there is confounding in this example. That is, $W_1$ and $W_2$ affect both the probability of having $A=1$, as well as the value of the outcome $Y$. Let's now explicity confirm that the parameter $$
+\Psi(P) = E\{E(Y | A=1, W) - E(Y | A=0, W)\}
+$$
+does indeed identify the causal effect.
+
+```{r}
+# write a loop to get mean of Y | A=1, W=w minus
+# mean of Y | A = 0, W = w in each strata of W
+out <- NULL
+for(w1 in c(0,1)){
+    for(w2 in c(0,1)){
+        ateThisW <- with(bigObs,
+            mean(Y[A == 1 & W_1==w1 & W_2==w2]) -
+                mean(Y[A == 0 & W_1==w1 & W_2==w2])
+            )
+        pThisW <- with(bigObs,
+            sum(W_1 == w1 & W_2 == w2)/nrow(bigObs)
+            )
+        out <- rbind(out, c(ateThisW, pThisW))
+    }
+}
+out <- data.frame(out)
+colnames(out) <- c("ate.w","p.w")
+
+# let's look at the matrix we just made
+out
+```
+
+The matrix `out` contains a column that shows the average treatment effect in each strata, as well as the proportion of observations falling in that strata. A few observations stand out:
+
+-- The average causal effect in each strata is equal to the overall average causal effect. Why? 
+
+-- The proportion falling in each strata is approximately equal. Why?
+
+We can use these values to get back the overall causal effect:
+```{r}
+sum(out$ate.w * out$p.w)
+```
+
+## III. Optimal treatment rules
+Let's consider a slight modification of the first example
+\begin{align*}
+U_{W,1} &\sim \mbox{Bernoulli}(1/2) \\
+U_{W,2} &\sim \mbox{Bernoulli}(1/2) \\
+U_A &\sim \mbox{Normal}(0,1) \\
+U_Y &\sim \mbox{Normal}(0,1) \ ,
+\end{align*}
+and structural equations \begin{align*}
+f_{W,1}(U_{W,1}) &= U_{W,1} \\
+f_{W,2}(U_{W,2}) &= U_{W,2} \\
+f_A(W_1, W_2, U_A) &= I(\mbox{expit}(W_1 - W_2 + U_A) > 0.5)\\
+f_Y(W_1, W_2, A, U_Y) &= 2W_1 - 3 W_1W_2 A + W_2 A - A + U_Y\ . 
+\end{align*}
+
+```{r}
+# this uses the same functions defined in section I
+# for f_W1, f_W2, f_A, but we need to re-define f_Y
+f_Y <- function(W_1, W_2, A, U_Y){
+    W_1 + W_2 - W_1*W_2*A + 3*W_2*A - A + U_Y
+}
+
+```
+
+Here, we will study intervening in a graph according to a specified treatment rule. There are four possible covariate strata: $(W_1, W_2) \in \{ (0,0), (0,1), (1,0), (1,1) \}$. Let's define a new variable $$
+W_S = f_S(W_1, W_2) = I(W_1 = 0, W_2 = 0) + 2 I(W_1 = 0, W_2 = 1) + 3 I(W_1 = 1, W_2 = 0) + 4 I(W_1 = 1, W_2 = 1) \ . 
+$$
+We are interested in the optimal treatment rule, which corresponds to picking a subset of the strata to treat. Let's write a function that can simulate from an intervened SCM according to a specified rule. 
+
+```{r}
+# define a function that takes as input
+# n = the number of observations to simulate
+# strataTrt = the values of W_s to treat 
+# return a data.frame according to the rule-specific intervened SCM 
+simRuleIntSCM <- function(n, strataTrt){
+    ## first we draw the errors
+    # draw U_{W,1}
+    U_W1 <- rbinom(n,1,0.5)
+    # draw U_{W,2}
+    U_W2 <- rbinom(n,1,0.5)
+    # draw U_A
+    U_A <- rnorm(n,0,1)
+    # draw U_Y
+    U_Y <- rnorm(n,0,1)
+
+    ## now we can evaluate the observations sequentially
+    # evaluate W_1
+    W_1 <- f_W1(U_W1)
+    #evaluate W_2
+    W_2 <- f_W2(U_W2)
+    # evaluate W_S
+    W_S <- as.numeric(I(W_1 == 0 & W_2 == 0) + 2*I(W_1 == 0 & W_2 == 1) + 
+        3*I(W_1 == 1 & W_2 == 0) + 4*I(W_1 == 1 & W_2 == 1))
+    # set A according to strataTrt
+    A <- as.numeric(W_S %in% strataTrt)
+
+    # evaluate Y with the set values of A
+    Y <- f_Y(W_1 = W_1, W_2 = W_2, A = A, U_Y = U_Y)
+
+    ## return a data.frame object
+    out <- data.frame(W_1 = W_1, W_2 = W_2, W_S = W_S, A = A, Yd = Y) 
+    return(out)
+}
+
+# simulate data treating strata 1
+ruleOnly1 <- simRuleIntSCM(n = 100, strataTrt = 1)
+# take a peak
+head(ruleOnly1)
+# confirm that anyone with W_S == 1 has A = 1
+all(ruleOnly1$A[ruleOnly1$WS==1] == 1)
+# and that anyone without W_S == 1 has A = 0 
+all(ruleOnly1$A[ruleOnly1$WS!=1] == 0)
+```
+We can now perform a grid search to determine the optimal treatment rule under this distribution. 
+
+```{r}
+# first create a list that contains all possible 
+# subsets of strata. We do this using the combn function
+strataList <- vector(mode="list", length=0)
+for(i in 1:4){
+    strataList <- c(strataList, 
+        combn(1:4, i, simplify = FALSE))
+}
+
+# you can look at the list to see what this command
+# did (omitted here for space)
+
+# strataList
+
+# write a function that computes E(Y_d)
+getEYd <- function(strata, n=1e5){
+    # simulate data according to rule
+    dat <- simRuleIntSCM(n=n, strataTrt = strata)
+    # calculate mean of Yd
+    return(mean(dat$Yd))
+}
+
+# apply the function over strataList
+allEYd <- unlist(lapply(strataList, getEYd))
+# look at all the values for E(Y_d)
+allEYd
+# optimal rule is the smallest value of E(Y_d)
+optIndex <- which(allEYd == min(allEYd))
+# what rule is it 
+strataList[optIndex]
+```
+
+Now let's confirm the identification result given in the notes. We can define a function to simulate observed data from the SCM, that is, without intervening:
+
+```{r}
+simRuleObsSCM <- function(n){
+    ## first we draw the errors
+    # draw U_{W,1}
+    U_W1 <- rbinom(n,1,0.5)
+    # draw U_{W,2}
+    U_W2 <- rbinom(n,1,0.5)
+    # draw U_A
+    U_A <- rnorm(n,0,1)
+    # draw U_Y
+    U_Y <- rnorm(n,0,1)
+
+    ## now we can evaluate the observations sequentially
+    # evaluate W_1
+    W_1 <- f_W1(U_W1)
+    #evaluate W_2
+    W_2 <- f_W2(U_W2)
+    # evaluate W_S
+    W_S <- as.numeric(I(W_1 == 0 & W_2 == 0) + 2*I(W_1 == 0 & W_2 == 1) + 
+        3*I(W_1 == 1 & W_2 == 0) + 4*I(W_1 == 1 & W_2 == 1))
+    # evaluate A according to f_A 
+    A <- f_A(W_1 = W_1, W_2 = W_2, U_A = U_A)
+
+    # evaluate Y with the set values of A
+    Y <- f_Y(W_1 = W_1, W_2 = W_2, A = A, U_Y = U_Y)
+
+    ## return a data.frame object
+    out <- data.frame(W_1 = W_1, W_2 = W_2, W_S = W_S, A = A, Y = Y) 
+    return(out)
+}
+```
+We now can simulate data from the observed data distribution implied by $P_{U,X}$. Recall from class that the optimal rule could be defined as $I(B_0(W) > 0)$, where $$
+B_0(W) = E(Y | A=1, W) - E(Y | A=0, W)
+$$ 
+is the "BLIP" function. Let's now write a function that simulates a large observed data set and computes the BLIP function in each strata. 
+
+```{r}
+getBlip <- function(strata, n = 1e6){
+    dat <- simRuleObsSCM(n = n)
+    EY.A1.WS <- mean(dat$Y[dat$W_S %in% strata & dat$A==1])
+    EY.A0.WS <- mean(dat$Y[dat$W_S %in% strata & dat$A==0])
+    blip <- EY.A1.WS - EY.A0.WS 
+    return(blip)
+}
+
+# now compute the blip for each strata
+allBlips <- unlist(lapply(split(1:4,1:4), getBlip))
+allBlips
+# which strata have blip < 0
+as.numeric(which(allBlips < 0))
+```
