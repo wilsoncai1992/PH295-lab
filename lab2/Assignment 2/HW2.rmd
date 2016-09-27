@@ -3,10 +3,12 @@ title: "Structural Causal Models and Parameters"
 author: "David Benkeser"
 date: "September 20, 2016"
 output:
+  pdf_document:
+    toc: yes
   html_document:
-    toc: true
-    theme: journal
     highlight: haddock
+    theme: journal
+    toc: yes
 ---
 
 ## I. Average treatment effect
