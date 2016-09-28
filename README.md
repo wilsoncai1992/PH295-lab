@@ -6,7 +6,7 @@
 - Week 2: Intro to R
 - Week 3: Make-up Lecture 2
 - Week 4: Guest speaker 1 (Oleg Sofrygin) -- `simcausal`
-- Week 5: TBA
+- Week 5: Bias-Variance Tradeoff
 - Week 6: TBA
 - Week 7: TBA
 - Week 8: TBA
