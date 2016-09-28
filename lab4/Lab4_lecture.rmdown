@@ -1,0 +1,123 @@
+---
+title: "Bias-Variance Tradeoff"
+author: "David Benkeser"
+date: "September 20, 2016"
+output:
+  html_document:
+    toc: true
+    theme: journal
+    highlight: haddock
+---
+## I. Introduction
+In class we have been working through the roadmap to targeted learning. This started with defining a statistical model,
+defined as the set of all possible data generating distributions. The statistical target parameter was defined as a function
+of a probability distribution, or in other words, a summary measure of the population of interest. We then saw how the interpretation
+of some statistical target parameters could be enriched by making untestable assumptions via a structural causal model. Conversely,
+we could start with the structural causal model and determine what interventions are of scientific interest. A causal parameter can
+be defined on the post-intervention distribution that is equal (under assumptions) to some statistical target parameter. If the
+assumptions do not hold, then the causal interpretation is not justified, but nevertheless the statistical target parameter may
+be an interesting object to study. 
+
+What we have often seen in class is that many statistical target parameters that are motivated causal parameters involve some 
+possibly high dimensional object. For example, in the setting where $O = (W, A, Y)$ and our interest is in estimating the counterfactual parameter $E_0(Y_1)$, we found that the statistical target parameter $E_0(E_0(Y \ | \ A = 1, W))$ was equal to 
+the counterfactual parameter under the assumption of randomization and positivity. Thus far in lab, we have been computing these statistical target parameters using an (effectively) infinite sample. However, in practice we rarely get to see a truly infinite sample size, which is why we have to consider the problem of statistical estimation. That is, how can be get the best estimate of the target parameter $E_0(E_0(Y \ | \ A = 1, W))$ when we don't get to observe the whole population.
+
+## II. Example 1
+Let's consider the following SCM:
+\begin{align*}
+U_W &\sim \mbox{Discrete Uniform}(0,50)\\
+U_A &\sim \mbox{Normal}(0,1) \\
+U_Y &\sim \mbox{Normal}(0,1) \ ,
+\end{align*}
+and structural equations \begin{align*}
+f_{W}(U_{W}) &= U_{W} \\
+f_A(W, U_A) &= I(\mbox{expit}(0.02 W + U_A) > 0.5)\\
+f_Y(W, A, U_Y) &= -W + 10 A - U_Y \ . 
+\end{align*}
+
+As with the last lab, we can explicity code this distribution in R. First, we write functions to represent each structural equation.
+
+```{r}
+# structural equation for W
+f_W <- function(U_W){
+    return(U_W)
+}
+
+# structural equation for A
+f_A <- function(W, U_A){
+    return(as.numeric(plogis(0.02*W + U_A) > 0.5))
+}
+
+# structural equation for Y
+f_Y <- function(W, A, U_Y){
+    return(-W + 10*A - U_Y)
+}
+```
+Now define a function to generate an observation from this SCM. 
+
+```{r}
+# function to draw n observations from an scm
+# n = the number of observations to draw
+# returns a data.frame with named columns
+simObsSCM <- function(n){
+    ## first we draw the errors
+    # draw Uniform(-0.5,50.5) and round
+    U_W <- round(runif(n,-0.5,50.5))
+    # draw U_A
+    U_A <- rnorm(n,0,1)
+    # draw U_Y
+    U_Y <- rnorm(n,0,1)
+
+	#evaluate the observations sequentially
+    # evaluate W
+    W <- f_W(U_W)
+    # evaluate A
+    A <- f_A(W = W, U_A = U_A)
+    # evaluate Y
+    Y <- f_Y(W = W, A = A, U_Y = U_Y)
+
+    ## return a data.frame object
+    out <- data.frame(W = W, A = A, Y = Y)
+    return(out)
+}
+```
+Similar to the last lab, we can write a function that intervenes on the SCM in order to calculate the true
+value of the counterfactual parameter, which we will need to benchmark our estimates.
+
+```{r}
+# function that draws n observations from an SCM that is 
+# intervened on to set A = setA
+# n = number of observations
+# setA = the value to set A equal to (0 or 1)
+# returns a data.frame of coutnerfactual observations
+simIntSCM <- function(n, setA = 1){
+	## first we draw the errors
+    # draw Uniform(-0.5,50.5) and round
+    U_W <- round(runif(n,-0.5,50.5))
+    # draw U_A
+    U_A <- rnorm(n,0,1)
+    # draw U_Y
+    U_Y <- rnorm(n,0,1)
+
+	# evaluate the observations sequentially
+    # evaluate W
+    W <- f_W(U_W)
+    # evaluate A
+    A <- rep(setA, n)
+    # evaluate Y
+    Y <- f_Y(W = W, A = A, U_Y = U_Y)
+
+    ## return a data.frame object
+    out <- data.frame(W = W, A = A, Y = Y)
+    return(out)
+}
+```
+
+Let's compute the true value by simulating a large sample using `simIntSCM`.
+
+```{r, cache=TRUE}
+bigInt <- simIntSCM(n = 1e6, setA=1)
+E0Y1 <- mean(bigInt$Y)
+E0Y1
+```
+Somethign else here?

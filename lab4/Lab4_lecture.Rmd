@@ -1,0 +1,659 @@
+---
+title: "Bias-Variance Tradeoff"
+author: "David Benkeser"
+date: "September 20, 2016"
+output:
+  html_document:
+    toc: true
+    theme: journal
+    highlight: haddock
+---
+## I. Introduction
+In class we have been working through the roadmap to targeted learning. This started with defining a statistical model,
+defined as the set of all possible data generating distributions. The statistical target parameter was defined as a function
+of a probability distribution, or in other words, a summary measure of the population of interest. We then saw how the interpretation
+of some statistical target parameters could be enriched by making untestable assumptions via a structural causal model. Conversely,
+we could start with the structural causal model and determine what interventions are of scientific interest. A causal parameter can
+be defined on the post-intervention distribution that is equal (under assumptions) to some statistical target parameter. If the
+assumptions do not hold, then the causal interpretation is not justified, but nevertheless the statistical target parameter may
+be an interesting object to study. 
+
+What we have often seen in class is that many statistical target parameters that are motivated causal parameters involve some 
+possibly high dimensional object. For example, in the setting where $O = (W, A, Y)$ and our interest is in estimating the counterfactual parameter $E_0(Y_1)$, we found that the statistical target parameter $E_0(E_0(Y \ | \ A = 1, W))$ was equal to 
+the counterfactual parameter under the assumption of randomization and positivity. Thus far in lab, we have been computing these statistical target parameters using an (effectively) infinite sample. However, in practice we rarely get to see a truly infinite sample size, which is why we have to consider the problem of statistical estimation. That is, how can be get the best estimate of the target parameter $E_0(E_0(Y \ | \ A = 1, W))$ when we don't get to observe the whole population.
+
+## II. Example 1
+Let's consider the following SCM:
+\begin{align*}
+U_W &\sim \mbox{Discrete Uniform}(0,50)\\
+U_A &\sim \mbox{Normal}(0,1) \\
+U_Y &\sim \mbox{Normal}(0,3^2) \ ,
+\end{align*}
+and structural equations \begin{align*}
+f_{W}(U_{W}) &= U_{W} \\
+f_A(W, U_A) &= I(\mbox{expit}(0.02 W + U_A) > 0.5)\\
+f_Y(W, A, U_Y) &= -W + 10 A - U_Y \ . 
+\end{align*}
+
+As with the last lab, we can explicity code this distribution in R. First, we write functions to represent each structural equation.
+
+```{r}
+# structural equation for W
+f_W <- function(U_W){
+    return(U_W)
+}
+
+# structural equation for A
+f_A <- function(W, U_A){
+    return(as.numeric(plogis(0.02*W + U_A) > 0.25))
+}
+
+# structural equation for Y
+f_Y <- function(W, A, U_Y){
+    return(-W + 10*A - U_Y)
+}
+```
+Now define a function to generate an observation from this SCM. 
+
+```{r}
+# function to draw n observations from an scm
+# n = the number of observations to draw
+# returns a data.frame with named columns
+simObsSCM <- function(n){
+    ## first we draw the errors
+    # draw Uniform(-0.5,50.5) and round
+    U_W <- round(runif(n,-0.5,50.5))
+    # draw U_A
+    U_A <- rnorm(n,0,1)
+    # draw U_Y
+    U_Y <- rnorm(n,0,3)
+
+	#evaluate the observations sequentially
+    # evaluate W
+    W <- f_W(U_W)
+    # evaluate A
+    A <- f_A(W = W, U_A = U_A)
+    # evaluate Y
+    Y <- f_Y(W = W, A = A, U_Y = U_Y)
+
+    ## return a data.frame object
+    out <- data.frame(W = W, A = A, Y = Y)
+    return(out)
+}
+```
+Similar to the last lab, we can write a function that intervenes on the SCM in order to calculate the true value of the counterfactual parameter, which we will need to benchmark our estimates.
+
+```{r}
+# function that draws n observations from an SCM that is 
+# intervened on to set A = setA
+# n = number of observations
+# setA = the value to set A equal to (0 or 1)
+# returns a data.frame of coutnerfactual observations
+simIntSCM <- function(n, setA = 1){
+	## first we draw the errors
+    # draw Uniform(-0.5,50.5) and round
+    U_W <- round(runif(n,-0.5,50.5))
+    # draw U_A
+    U_A <- rnorm(n,0,1)
+    # draw U_Y
+    U_Y <- rnorm(n,0,1)
+
+	# evaluate the observations sequentially
+    # evaluate W
+    W <- f_W(U_W)
+    # evaluate A
+    A <- rep(setA, n)
+    # evaluate Y
+    Y <- f_Y(W = W, A = A, U_Y = U_Y)
+
+    ## return a data.frame object
+    out <- data.frame(W = W, A = A, Y = Y)
+    return(out)
+}
+```
+
+Let's compute the true value by simulating a large sample using `simIntSCM`.
+
+```{r, cache=TRUE}
+bigInt <- simIntSCM(n = 1e6, setA=1)
+E0Y1 <- mean(bigInt$Y)
+E0Y1
+```
+
+The true value of $E_0(Y_1)$ is seen to be `r round(E0Y1)`. In the last lab, we computed the true value of a causal effect when $W$ only assumed four unique values. In this example, $W$ assumes fifty one unique values. However, our identification result did not rely on $W$ being discrete or low-dimensional, so we can numerically confirm that indeed $E_0(Y_1) = E_0(E_0(Y | A = 1, W))$. 
+
+```{r, cache=TRUE}
+# let's go ahead and write a function that takes as input
+# a data frame from the observed SCM and computes the 
+# mean in each strata and returns it as a vector
+getStratEst <- function(data, strata = 0:50){
+    est <- rep(NA, length(strata))
+    # over each unique value of W compute the mean of Y in the A=1 grp
+    for(w in strata){
+         # let's check to make sure someone is in each strata
+        if(sum(bigObs$A == 1 & bigObs$W == w) > 0){
+            est[w + 1] <- mean(data$Y[data$A == 1 & data$W == w])
+        }else{
+            est[w + 1] <- NA
+        }
+    }
+    # return the vector
+    est
+}
+
+# simulate very large data set from the observed SCM
+bigObs <- simObsSCM(n = 5e6)
+
+# get the stratified estimate 
+E0Y_A1Ww <- getStratEst(data = bigObs)
+
+# we know the probability that W=w, it's 1/51
+pw <- rep(1/51, 51)
+
+# sum over all the strata to get E_0(E_0(Y | A = 1, W))
+E0E0Y_A1Ww <- sum(pw * E0Y_A1Ww)
+
+# the statistical target parameter
+E0E0Y_A1Ww <- sum(pw * E0Y_A1Ww)
+E0E0Y_A1Ww
+```
+
+Indeed, we have confirmed that because the randomization and positivity assumptions hold in this example the statistical parameter is equal to the counterfactual parameter. 
+
+However, we have been working with an effectively infinite sample size, which may not be available in practice. This enormous sample allows us to compute stable estimates of $E_0(Y | A = 1, W = w)$ for every stratum $w$. Let's plot the "estimated" (using the huge sample) values and the true values, which we know because we simulated the data. 
+
+```{r, cache = TRUE}
+# vector of all w values, makes it easier to plot
+allw <- 0:50
+# plot "estimated" values
+plot(E0Y_A1Ww ~ allw, bty="n", xlab="w", 
+     ylab=expression(E[0]*"(Y | A=1, W)")) 
+# add true values
+E0Y_A1Ww_true <- -allw + 10
+points(E0Y_A1Ww_true ~ allw, pch=3)
+# add legend
+legend(x=30, y=10, bty="n", pch = c(1,3),
+       legend = c("'Estimated'", "True"))
+```
+
+Let's see what happens when we don't use an infinite sample size. Here's the same code run, but now only simulating $5,000$ observations.
+```{r, cache=TRUE}
+# simulate n=5,000 observations from the observed SCM
+smallerObs <- simObsSCM(n = 5e3)
+
+# get stratified estimates 
+EhatY_A1Ww <- getStratEst(data = smallerObs)
+
+# plot stratified-estimated values
+plot(EhatY_A1Ww ~ allw, bty="n", xlab="w", 
+     ylab=expression(hat(E)*"(Y | A=1, W)"),
+     mgp = c(2.1,0.5,0))
+# add true values
+points(E0Y_A1Ww_true ~ allw, pch=3) 
+# add legend
+legend(x=30, y=10, bty="n", pch = c(1,3),
+       legend = c("Estimated", "True"))
+```
+
+What about with only $500$ observations?
+```{r, cache=TRUE}
+# simulate n=5,000 observations from the observed SCM
+smallerObs <- simObsSCM(n = 5e2)
+
+# get stratified estimates 
+EhatY_A1Ww <- getStratEst(data = smallerObs)
+
+# plot stratified-estimated values
+plot(EhatY_A1Ww ~ allw, bty="n", xlab="w", 
+     ylab=expression(hat(E)*"(Y | A=1, W)"),
+     mgp = c(2.1,0.5,0))
+# add true values
+points(E0Y_A1Ww_true ~ allw, pch=3) 
+# add legend
+legend(x=30, y=10, bty="n", pch = c(1,3),
+       legend = c("Estimated", "True"))
+```
+
+What about only $100$ observations
+```{r, cache=TRUE}
+# simulate n=5,000 observations from the observed SCM
+smallerObs <- simObsSCM(n = 1e2)
+
+# get stratified estimates 
+EhatY_A1Ww <- getStratEst(data = smallerObs)
+
+# plot stratified-estimated values
+plot(EhatY_A1Ww ~ allw, bty="n", xlab="w", 
+     ylab=expression(hat(E)*"(Y | A=1, W)"),
+     mgp = c(2.1,0.5,0))
+# add true values
+points(E0Y_A1Ww_true ~ allw, pch=3) 
+# add legend
+legend(x=30, y=10, bty="n", pch = c(1,3),
+       legend = c("Estimated", "True"))
+```
+
+Now we see problems arise with the stratified estimator. 
+
+1. When there are few observations in each strata, the estimator will have high variance. 
+
+2. When there are no observations in a stratum, the estimator is not well defined. 
+
+
+
+## III. Simple kernel regression
+In this section we will start to explore solutions the problems with stratified estimators that we explored in the previous section. We will move into the even harder problem where $W$ is a continuous variable. With continuous variables there is no hope of constructing a stratified estimator because the probability that $W=w$ for any choice of $w$ is 0. Let's modify some of the functions from the first section to a new SCM. 
+
+Let's consider the following SCM:
+\begin{align*}
+U_W &\sim \mbox{Uniform}(0,50)\\
+U_A &\sim \mbox{Normal}(0,1) \\
+U_Y &\sim \mbox{Normal}(0,3^2) \ ,
+\end{align*}
+and structural equations \begin{align*}
+f_{W}(U_{W}) &= U_{W} \\
+f_A(W, U_A) &= I(\mbox{expit}(0.02 W + U_A) > 0.5)\\
+f_Y(W, A, U_Y) &= -W + 10 A - U_Y \ . 
+\end{align*}
+
+
+```{r}
+# function to draw n observations from an scm
+# n = the number of observations to draw
+# returns a data.frame with named columns
+simObsSCM <- function(n){
+    ## first we draw the errors
+    # draw Uniform(-0.5,50.5) and round
+    U_W <- runif(n,0,50)
+    # draw U_A
+    U_A <- rnorm(n,0,1)
+    # draw U_Y
+    U_Y <- rnorm(n,0,3)
+
+	#evaluate the observations sequentially
+    # evaluate W
+    W <- f_W(U_W)
+    # evaluate A
+    A <- f_A(W = W, U_A = U_A)
+    # evaluate Y
+    Y <- f_Y(W = W, A = A, U_Y = U_Y)
+
+    ## return a data.frame object
+    out <- data.frame(W = W, A = A, Y = Y)
+    return(out)
+}
+```
+
+To solve this problem, we might begin by thinking that people in strata $w$ probably aren't that different than people in strata $w + h/2$ or people in strata $w - h/2$ for some small number $h$. For example, do we think that people with $W = 10$ differ significantly in their outcome than people with $W = 10.01$ or people with $W = 9.99$? Therefore, we might think we could obtain a good estimate by using a moving average. That is, we pick a window around each $w$ of width $h$ and then estimate the function $E_0(Y | A=1, W=w)$ with the average outcome for observations in that window.
+
+```{r}
+# this function takes as input a dataframe of observations
+# and computes the moving window average of the mean of Y
+# given W at each value of the vector wValues 
+# the function returns a data.frame with columns w (wValues)
+simpleKern <- function(
+    dat, # data.frame of observations
+    h, # the size of the window
+    wValues # values at which to return kernel predictions
+    ){
+    # for each value in wValues, compute the mean of the observed
+    # data with A = 1 in that window 
+    # empty vector of results
+    EhatY <- rep(NA, length(wValues))
+    ct <- 0
+    for(w in wValues){
+        ct <- ct + 1
+        EhatY[ct] <- 
+            mean(dat$Y[dat$A == 1 & dat$W < w + h/2 & dat$W > w - h/2])
+    }
+    
+    return(data.frame(
+        w = wValues,
+        EhatY = EhatY
+    ))
+}
+```
+
+Let's try out this function for a couple choices of bandwidth. 
+
+```{r}
+# try it out
+dat <- simObsSCM(n=200)
+
+# for window size 2
+fit2 <- simpleKern(dat = dat, 
+                  h = 2, # window of size 2
+                  wValues = seq(0,50, length = 200)) # evenly spaced from 0,50
+fit20 <- simpleKern(dat = dat, 
+                  h = 20, # window of size 20
+                  wValues = seq(0,50, length = 200)) # evenly spaced from 0,50
+
+plot(fit2$EhatY ~ fit2$w, bty="n",xlab="w", type="l",
+     ylab=expression(hat(E)*"(Y | A = 1, W =w)"),
+     mgp = c(2.1, 0.5, 0),lwd=2)
+lines(fit20$EhatY ~ fit20$w,lwd=2, lty=2)
+points(dat$Y ~ dat$W, col="gray75")
+legend(x="topright", lty=c(1,2), title="h", legend = c(2,20))
+```
+
+We can already see the bias/variance tradeoff in play here. The small bandwidth ($h=2$) results in a jagged fit that appears to have smaller bias, but we expect there to be more variance. The larger bandwidth ($h=20$) has bias (look at the tails), but we expect has less variance. We can confirm these by writing a function that computes a Monte Carlo estimate of the bias and variance at several points.
+
+
+```{r}
+getBiasVariance <- function(
+    estimator, # a function that takes as input a data set and 
+               # vector of w values called 'wValues' and outputs
+               # a value for the estimator at w
+    truth, # a function that takes as input a vector wValues and outputs the
+           # true value at those values
+    n, # sample size
+    wValues, # vector of strata to compute bias and variance 
+    nSim = 100, # number of repeated draws to compute bias and variance
+    getMSE = FALSE, # should bias and variance be returned or MSE?
+    ... # other args passed to estimator (e.g., h)
+){
+    estMat <- NULL
+    for(i in 1:nSim){
+        dat <- simObsSCM(n = n)
+        est <- do.call(estimator, 
+                       args = c(list(dat = dat, wValues = wValues),
+                                 list(...)))
+        estMat <- rbind(estMat, est$EhatY)
+    }
+    trueValues <- do.call(truth, args = list(wValues = wValues))
+    if(!getMSE){
+       # compute the bias and variance
+        if(is.matrix(estMat)){
+            bias <- colMeans(estMat, na.rm=TRUE) - trueValues
+            variance <- apply(estMat, 2, var)
+        }else{
+            bias <- mean(estMat, na.rm = TRUE) - trueValues
+            variance <- var(estMat, na.rm = TRUE)
+        }
+        names(bias) <- wValues
+        names(variance) <- wValues
+       # return a list
+        out <- list(bias = bias, variance = variance)
+    }else{
+        mse <- apply(matrix(1:ncol(estMat)), 1, function(i){
+            mean((estMat[,i] - trueValues[i])^2)
+        })
+        names(mse) <- wValues
+        out <- list(mse = mse)
+    }
+    out
+}
+```
+
+Let's try out the function to see what it does. Here we call the function to get the Monte Carlo estimated bias and variance of $\hat{E}(Y | A=1, W=w)$ for $w \in \{5,25,45\}$, where the estimate is computed using our function `simpleKern` with $h=5$. 
+
+```{r}
+# call the function to get the estimated bias and variance of 
+# \hat{E}
+getBiasVariance(
+    estimator = "simpleKern", # estimation function to use
+    truth = function(wValues){ -wValues + 10 }, # the true value
+    n = 500, # sample size
+    wValues = c(5, 25, 45),
+    nSim = 1000,
+    h = 5
+)
+```
+
+Or alternatively, we could directly study the mean squared-error, which is a combination of bias and variance.
+
+```{r}
+# call the function to get the estimated bias and variance of 
+# \hat{E}
+getBiasVariance(
+    estimator = "simpleKern", # estimation function to use
+    truth = function(wValues){ -wValues + 10 }, # the true value
+    n = 500, # sample size
+    wValues = c(5, 25, 45),
+    nSim = 1000,
+    h = 5, 
+    getMSE = TRUE
+)
+```
+
+Now let's run for a few different choices of $h$ at a single point $W=25$ to get bias and variances of our simple estimator at that points. 
+
+```{r}
+# I'm going to be repeating the same code under several different  
+# scenarios, so let's go ahead and write a function that takes an input
+# of h's and outputs a graph of the the Bias^2 and Variance at a particular 
+# point for each of those choices of bandwidth. 
+plotBiasVariance <- function(hGrid, wValue, n, 
+                             estimator = "simpleKern",
+                             plotMSE = FALSE){
+    rslt <- lapply(split(hGrid, hGrid), getBiasVariance, 
+                   estimator = estimator, 
+                   truth = function(wValues){ f_Y(W=wValues, A=1, U_Y = 0) },
+                   n = n, getMSE = plotMSE,
+                   wValues = wValue, 
+                   nSim = 1000)
+    
+    if(!plotMSE){
+       # transform result list into data.frame
+        biasRslt <- data.frame(h=hGrid, 
+                               bias=unlist(lapply(rslt, function(x){x$bias}),
+                                           use.names=FALSE))
+        varRslt <- data.frame(h=hGrid, 
+                              variance=unlist(
+                                  lapply(rslt, function(x){x$variance}),
+                                          use.names = FALSE))
+        # standardize results to put on same graph
+        biasRslt$bias2_s <- 
+            (biasRslt$bias^2 - min(biasRslt$bias^2))/diff(range(biasRslt$bias^2))
+      varRslt$variance_s <- 
+            (varRslt$variance -min(varRslt$variance))/diff(range(varRslt$variance))
+
+        # plot results
+        par(mar = c(4.1, 3.1, 0.5, 3.1), mgp = c(1.5, 0.5, 0))
+        plot(bias2_s ~ h, data = biasRslt, type="b",yaxt="n", 
+             xlab = "h", ylab = expression(Bias^2))
+        points(variance_s ~ h, data = varRslt, type="b", pch=2, lty=2)
+        axis(side = 2, at = seq(0,1,length = 5), labels = rep("", 5))
+        axis(side = 4, at = seq(0,1,length = 5), labels = rep("", 5))
+        mtext(side = 4, line = par()$mgp[1], "Variance")
+        legend(x="topleft", pch = c(1,2), legend = c("Bias", "Variance"))
+    }else{
+        # mse results list into data.frame
+        mseRslt <- data.frame(h=hGrid, 
+                              mse=unlist(lapply(rslt, function(x){x$mse}),
+                                           use.names=FALSE))
+        # plot results
+        par(mar = c(4.1, 3.1, 0.5, 3.1), mgp = c(1.5, 0.5, 0))
+        plot(mse ~ h, data = mseRslt, type="b",
+             xlab = "h", ylab = expression(MSE))
+        legend(x="topleft", pch = c(1,2), legend = c("MSE"))
+    }
+}
+
+# run the function to plot bias and variance
+set.seed(1234)
+plotBiasVariance(hGrid = seq(1, 30, length = 10), 
+                 wValue = 25, 
+                 n = 500)
+
+# run the function plot MSE
+set.seed(1234)
+plotBiasVariance(hGrid = seq(1, 30, length = 10), 
+                 wValue = 25, 
+                 n = 500, plotMSE = TRUE)
+```
+
+It looks from the results like using a bandwidth of $h=7$ -ish results in the optimal bias-variance trade-off (at least for estimate $E_0(Y | A = 1, W = 25)$). What happens if we change the sample size? Heuristically, we need to be using a smaller and smaller window size to ensure there's no bias. Here are the results for $n=10,000$ and using a smaller set of bandwidths. 
+
+```{r, cache = TRUE}
+# plot the bias and variance
+set.seed(1234)
+plotBiasVariance(hGrid = seq(1, 10, length = 10), 
+                 wValue = 25, 
+                 n = 10000)
+# plot the mse
+set.seed(1234)
+plotBiasVariance(hGrid = seq(1, 10, length = 10), 
+                 wValue = 25, 
+                 n = 10000, plotMSE = TRUE)
+```
+
+Now the optimal bandwith appears to be somewhere around $h=5$, as we'd expect. This illustrates a general point that the bandwidth should be shrinking with $n$ to maintain an optimal bias-variance trade-off. 
+
+But just making the bandwidth get smaller with $n$ is not the whole story. What happens if we change the underlying data-generating mechanism to something that is more smooth, e.g. let's set $$
+f_Y(W, A, U_Y) = -0.01 W + 10 A - U_Y \ . 
+$$
+
+```{r}
+# redefine structural equation for Y
+f_Y <- function(W, A, U_Y){
+    -0.01*W + 10*A - U_Y
+}
+# plot the bias and variance
+set.seed(1234)
+plotBiasVariance(hGrid = seq(1, 50, length = 10), 
+                 wValue = 25, 
+                 n = 500)
+
+# plot the mse
+set.seed(1234)
+plotBiasVariance(hGrid = seq(1, 50, length = 10), 
+                 wValue = 25, 
+                 n = 500, plotMSE = TRUE)
+```
+
+Now the optimal bandwidth is much larger. Why?
+
+What happens if we make the data generating distribution less smooth?
+
+```{r}
+# redefine structural equation for Y
+f_Y <- function(W, A, U_Y){
+    10*sin(W/2) + 10*A - U_Y
+}
+
+# plot the bias and variance
+set.seed(1234)
+plotBiasVariance(hGrid = seq(1, 20, length = 10), 
+                 wValue = 25, 
+                 n = 2000)
+
+# plot the mse
+set.seed(1234)
+plotBiasVariance(hGrid = seq(1, 20, length = 10), 
+                 wValue = 25, 
+                 n = 2000, plotMSE = TRUE)
+```
+
+We are still cheating in these examples, because in real life we do not have access to repeated experiments to determine the optimal bandwidth. Even though we might know the rate at which the bandwidth should be decreasing (which, by the way, already requires knowing something about the underlying smoothness), we will not know for a given sample the actual bandwidth to choose. 
+
+This motivates the use of cross-validation, which mimics repeated experiments through sample splitting. 
+
+## IV. Other kernels
+
+The above function `simpleKern` was an example of kernel regression using a uniform kernel. A kernel can basically be thought of as a weighting function. Above, we gave equal weight to all observations within a specified window. However, it may make more sense to weight observations nearer to the point of interest more heavily than those far away from the point of interest. Below, I write my own kernel regression function to illustrate how this works. 
+
+```{r}
+# normal kernel. Takes as input a vector of observed points wObs, 
+# a bandwidth h and a single point w and returns the normal kernel 
+# evaluated at each wObs.
+Knorm <- function(wObs, h, w){
+    dnorm((w - wObs)/h)
+}
+
+# try it out to see what it does
+Knorm(wObs = 0:10, h = 5, w = 5)
+
+# this function takes as input a dataframe of observations
+# and computes the moving window average of the mean of Y
+# given W at each value of the vector wValues 
+# the function returns a data.frame with columns w (wValues)
+kernReg <- function(
+    dat, # data.frame of observations
+    h, # bandwidth
+    K, # kernel function that takes inputs called wObs, h, and w
+    wValues # values at which to return kernel predictions
+    ){
+    # for each value in wValues, compute the mean of the observed
+    # data with A = 1 in that window 
+    # empty vector of results
+    EhatY <- rep(NA, length(wValues))
+    ct <- 0
+    for(w in wValues){
+        ct <- ct + 1
+        thisK <- do.call(K, args = list(wObs = dat$W, h = h, w = w))
+        EhatY[ct] <- sum(thisK * dat$Y) / sum(thisK)
+    }
+    
+    return(data.frame(
+        w = wValues,
+        EhatY = EhatY
+    ))
+}
+```
+
+Let's try it out. 
+```{r}
+# try it out
+dat <- simObsSCM(n=200)
+
+# for window size 2
+fit2 <- kernReg(dat = dat, K = "Knorm",
+                  h = 2, # window of size 2
+                  wValues = seq(0,50, length = 200)) # evenly spaced from 0,50
+fit20 <- kernReg(dat = dat, K = "Knorm",
+                  h = 20, # window of size 20
+                  wValues = seq(0,50, length = 200)) # evenly spaced from 0,50
+
+plot(fit2$EhatY ~ fit2$w, bty="n",xlab="w", type="l",
+     ylab=expression(hat(E)*"(Y | A = 1, W =w)"),
+     mgp = c(2.1, 0.5, 0),lwd=2, main= "Kernel regression, normal kernel")
+lines(fit20$EhatY ~ fit20$w,lwd=2, lty=2)
+points(dat$Y ~ dat$W, col="gray75")
+legend(x="topright", lty=c(1,2), title="h", legend = c(2,20))
+```
+
+The Epanechnikov kernel is the optimal kernel in the mean-squared error sense. 
+
+```{r}
+# normal kernel. Takes as input a vector of observed points wObs, 
+# a bandwidth h and a single point w and returns the normal kernel 
+# evaluated at each wObs.
+Kepan <- function(wObs, h, w){
+    u <- (w - wObs)/h
+    k <- 3/4 * (1-u^2)*(abs(u)<=1)
+}
+
+# try it out to see what it does
+Kepan(wObs = 0:10, h = 5, w = 5)
+
+# compare to the normal kernal
+k1 <- Kepan(wObs = 0:10, h = 5, w = 5)
+k2 <- Knorm(wObs = 0:10, h = 5, w = 5)
+comp <- cbind(
+    k1/sum(k1),
+    k2/sum(k2)
+)
+colnames(comp) <- c("Epanechnikov", "Normal")
+comp
+```
+
+One more plot using Epanechnikov kernel.
+
+```{r}
+# try it out
+dat <- simObsSCM(n=200)
+
+# for window size 2
+fit2 <- kernReg(dat = dat, K = "Kepan",
+                  h = 2, # window of size 2
+                  wValues = seq(0,50, length = 200)) # evenly spaced from 0,50
+
+plot(fit2$EhatY ~ fit2$w, bty="n",xlab="w", type="l",
+     ylab=expression(hat(E)*"(Y | A = 1, W =w)"),
+     mgp = c(2.1, 0.5, 0),lwd=2, 
+     main= "Kernel regression, Epanechnikov kernel")
+points(dat$Y ~ dat$W, col="gray75")
+```
+
+See the `npreg` package for many more kernel regression options (and much more efficient implementation than my own!).
