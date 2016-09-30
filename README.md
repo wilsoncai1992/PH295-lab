@@ -1,4 +1,4 @@
-# PB HTLH 295: Big Data Seminar Week material
+# PB HTLH 295: Big Data Seminar material
 
 ## Schedule
 
