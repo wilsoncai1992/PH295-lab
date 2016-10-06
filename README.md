@@ -7,8 +7,8 @@
 - Week 3: Make-up Lecture 2
 - Week 4: Guest speaker 1 (Oleg Sofrygin) -- `simcausal`
 - Week 5: Bias-Variance Tradeoff
-- Week 6: TBA
-- Week 7: TBA
+- Week 6: SuperLearner: Part I
+- Week 7: SuperLearner: Part II
 - Week 8: TBA
 - Week 9: TBA
 - Week 10: TBA
