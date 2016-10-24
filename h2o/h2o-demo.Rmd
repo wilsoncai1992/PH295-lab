@@ -1,0 +1,368 @@
+---
+title: "h2o.ai demo"
+output:
+  html_notebook: default
+---
+
+## Acknowledgements
+
+These are customized from Erin LeDell's materials.
+
+## General dependencies
+
+Other than h2o, we will use `caret`, `mlbench`, and `cvAUC` R packages.
+
+## Install h2o
+
+Follow the instructions at http://h2o.ai/download (click "Latest stable release" button then the "Install in R" tab.)
+
+## Install h2oEnsemble
+
+```{r eval=F}
+devtools::install_github("h2oai/h2o-3/h2o-r/ensemble/h2oEnsemble-package")
+```
+
+## Start h2o cluster
+
+```{r}
+# This will load the h2o R package as well.
+library(h2oEnsemble)  
+
+# Start an H2O cluster with nthreads = num cores on your machine.
+# -1 means to use all cores.
+h2o.init(nthreads = -1)
+
+# Clean slate - just in case the cluster was already running.
+h2o.removeAll()
+```
+
+## Setup dataset
+
+We will use the BreastCancer dataset from the mlbench package, where the outcome variable is whether the cancer cell is malignant. We have a little cleaning to do to setup the dataset for modeling.
+
+```{r}
+############################
+# Setup test dataset from mlbench.
+
+# NOTE: install mlbench package if you don't already have it.
+data(BreastCancer, package = "mlbench")
+
+# Specify our outcome variable.
+y = "Class"
+
+# Remove missing values - could impute for improved accuracy.
+data = na.omit(BreastCancer)
+
+# Remove ID column and outcome variable.
+# Save as a new df so that we can add outcome back later.
+data2 = data[, !names(data) %in% c("Id", y)]
+
+str(data2)
+
+# Expand out factors into indicators (ignore ordinality of several factors).
+# Alternatively we could convert the ordinal factors to numerics.
+data2 = data.frame(model.matrix( ~ . - 1, data = data2))
+
+# Check dimensions after we expand our dataset.
+dim(data2)
+
+library(caret)
+# Remove zero variance (constant) and near-zero-variance columns.
+# This can help reduce overfitting and also helps us use a basic glm().
+# However, there is a slight risk that we are discarding helpful information.
+preproc = caret::preProcess(data2, method = c("zv", "nzv"))
+data2 = predict(preproc, data2)
+rm(preproc)
+
+# Review our dimensions.
+dim(data2)
+
+# Add outcome back into dataframe as initial column.
+data2 = cbind(data[, y], data2)
+
+# Recover outcome name.
+colnames(data2)[1] = y
+
+# Review final dataset structure.
+str(data2)
+
+# Clean up
+rm(data, BreastCancer)
+```
+
+## Loading data
+
+```{r}
+# Load data into h2o.
+data = as.h2o(data2)
+
+# Or use h2o.importFile() to import directly from CSVs.
+
+# Check dimensions.
+dim(data)
+
+# Check distribution of outcome variable.
+summary(data[, y], exact_quantiles = T)
+
+# Divide into training (70%) and holdout (30%).
+# We need to set an h2o-specific seed for reproducibility.
+# If we used splits of less than 100%, h2o would allocate a third split to the
+# remainder.
+splits = h2o.splitFrame(data, 0.7, seed = 1234)
+
+# Allocate the training split to a new dataframe in h2o.
+train_frame = h2o.assign(splits[[1]], "train")
+
+# Check dimensions
+dim(train_frame)
+
+# Allocate the holdout split to a new dataframe in h2o.
+holdout_frame = h2o.assign(splits[[2]], "holdout")
+
+# Check dimensions
+dim(holdout_frame)
+
+# Specify the names of our predictors, removing our target variable.
+features = setdiff(names(data), y)
+
+```
+
+## Train ensemble
+
+We will use the glm, randomForest, and GBM (gradient boosted machines) learners in the ensemble. Note that glm in h2o means elastic net, not OLS.
+
+```{r}
+
+learners = c("h2o.glm.wrapper", "h2o.randomForest.wrapper",
+             "h2o.gbm.wrapper")
+
+# Deeplearner would be h2o.deeplearning.wrapper
+
+# We can create a non-negative least squared learner by specifying
+# non_negative = T. We can also avoid the elastic net penalization
+# (if we prefer) by setting lambda = 0.
+# There appears to be a bug where intercept = F is not processed correctly.
+h2o.glm_nn = function(...) {
+  h2o.glm.wrapper(..., non_negative = T, lambda = 0, intercept = F)
+}
+
+metalearner = "h2o.glm_nn"
+
+# Alternative simple metalearner:
+#metalearner = "h2o.glm.wrapper"
+
+fit_ens = h2o.ensemble(x = features, y = y,  training_frame = train_frame,
+                    family = "AUTO",  learner = learners,
+                    metalearner = metalearner, cvControl = list(V = 5))
+
+# The metafit element contains the model weights and other details.
+fit_ens$metafit
+```
+
+## Predict
+
+```{r}
+
+pred = predict(fit_ens, holdout_frame)
+# Third column is P(Y == 1)
+predictions = as.data.frame(pred$pred)[, 3]  
+labels = as.data.frame(holdout_frame[, y])[, 1]
+```
+
+## Review performance
+
+We can use the holdout data to estimate our general performance, both for the ensemble and each individual learner.
+
+```{r}
+library(cvAUC)
+
+# Review performance of final ensemble.
+cvAUC::AUC(predictions = predictions, labels = labels)
+
+# Look at performance of individual learners (algorithms).
+num_learners = length(learners)
+aucs = sapply(1:num_learners, function(l) {
+  cvAUC::AUC(predictions = as.data.frame(pred$basepred)[, l], labels = labels)
+}) 
+data.frame(learners, aucs)
+```
+
+If we had used the deep learning wrapper the ensemble results would not be reproducible. 
+
+## Review models
+
+Let's review the underlying randomForest model to get a better sense of what happened. The `basefits` element of our ensemble contains the information on the individual learners.
+
+For randomForest we have two performance estimates: 1) those from the cross-validation and 2) the out-of-bag estimates.
+
+```{r}
+names(fit_ens)
+
+# Review modeling metrics, both OOB and via cross-validation.
+fit_ens$basefits$h2o.randomForest.wrapper
+
+# Review variable importance.
+# Warning: this is not a true parameter as Mark has mentioned, so we
+# have no inference on these results.
+h2o.varimp(fit_ens$basefits$h2o.randomForest.wrapper)
+
+# Plot variable importance.
+h2o.varimp_plot(fit_ens$basefits$h2o.randomForest.wrapper)
+
+```
+
+We could also review the GBM and elastic net results.
+
+## Customizing hyperparameters
+
+Let's increase the number of trees in the randomForest and the number of bins. h2o discretizes continuous variables via a histogram, which is much faster than checking all possible values for decision tree splitting. But it's not exactly what Leo Breiman's Random Forest does.
+
+In this case we only have binary variables so the bin change should not matter. In general usage we may see improved performance in exchange for slower computation when we increase the number of bins. 
+
+```{r}
+# Increase number of trees and number of histogram bins for continuous variables.
+h2o.randomForest.1 = function(...) {
+  h2o.randomForest.wrapper(..., ntrees = 200, nbins = 50, seed = 1)
+}
+
+new_library = learner <- c("h2o.glm.wrapper", "h2o.randomForest.wrapper",
+             "h2o.randomForest.1", "h2o.gbm.wrapper")
+
+fit = h2o.ensemble(x = features, y = y, 
+                    training_frame = train_frame,
+                    family = "AUTO", 
+                    learner = new_library, 
+                    metalearner = metalearner,
+                    cvControl = list(V = 5))
+
+fit$metafit
+```
+
+And review the performance again.
+
+```{r}
+
+pred = predict(fit, holdout_frame)
+
+# Third column is P(Y == 1)
+predictions = as.data.frame(pred$pred)[, 3]  
+labels = as.data.frame(holdout_frame[, y])[, 1]
+
+# Review performance of final ensemble.
+cvAUC::AUC(predictions = predictions, labels = labels)
+
+# Look at performance of individual learners (algorithms).
+num_learners = length(new_library)
+aucs = sapply(1:num_learners, function(l) {
+  cvAUC::AUC(predictions = as.data.frame(pred$basepred)[, l], labels = labels)
+}) 
+data.frame(new_library, aucs)
+```
+
+## Random Grid Search
+
+Demo of random grid search, all from Erin LeDell's code. This will be pretty slow. First we fit the base models. 
+
+```{r}
+# Random Grid Search (e.g. 120 second maximum)
+# This is set to run fairly quickly, increase max_runtime_secs 
+# or max_models to cover more of the hyperparameter space.
+# Also, you can expand the hyperparameter space of each of the 
+# algorithms by modifying the hyper param code below.
+
+search_criteria <- list(strategy = "RandomDiscrete", 
+                        max_runtime_secs = 120)
+nfolds <- 5
+
+# GBM Hyperparamters
+learn_rate_opt <- c(0.01, 0.03) 
+max_depth_opt <- c(3, 4, 5, 6, 9)
+sample_rate_opt <- c(0.7, 0.8, 0.9, 1.0)
+col_sample_rate_opt <- c(0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8)
+hyper_params <- list(learn_rate = learn_rate_opt,
+                     max_depth = max_depth_opt, 
+                     sample_rate = sample_rate_opt,
+                     col_sample_rate = col_sample_rate_opt)
+
+gbm_grid <- h2o.grid("gbm", x = features, y = y,
+                     training_frame = train_frame,
+                     ntrees = 100,
+                     seed = 1,
+                     nfolds = nfolds,
+                     fold_assignment = "Modulo",
+                     keep_cross_validation_predictions = TRUE,
+                     hyper_params = hyper_params,
+                     search_criteria = search_criteria)
+gbm_models <- lapply(gbm_grid@model_ids, function(model_id) h2o.getModel(model_id))
+
+
+
+# RF Hyperparamters
+mtries_opt <- 8:20 
+max_depth_opt <- c(5, 10, 15, 20, 25)
+sample_rate_opt <- c(0.7, 0.8, 0.9, 1.0)
+col_sample_rate_per_tree_opt <- c(0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8)
+hyper_params <- list(mtries = mtries_opt,
+                     max_depth = max_depth_opt,
+                     sample_rate = sample_rate_opt,
+                     col_sample_rate_per_tree = col_sample_rate_per_tree_opt)
+
+rf_grid <- h2o.grid("randomForest", x = features, y = y,
+                    training_frame = train_frame,
+                    ntrees = 200,
+                    seed = 1,
+                    nfolds = nfolds,
+                    fold_assignment = "Modulo",
+                    keep_cross_validation_predictions = TRUE,                    
+                    hyper_params = hyper_params,
+                    search_criteria = search_criteria)
+rf_models <- lapply(rf_grid@model_ids, function(model_id) h2o.getModel(model_id))
+
+# GLM Hyperparamters
+alpha_opt <- seq(0,1,0.1)
+lambda_opt <- c(0,1e-7,1e-5,1e-3,1e-1)
+hyper_params <- list(alpha = alpha_opt,
+                     lambda = lambda_opt)
+
+glm_grid <- h2o.grid("glm", x = features, y = y,
+                     training_frame = train_frame,
+                     family = "binomial",
+                     nfolds = nfolds,
+                     fold_assignment = "Modulo",
+                     keep_cross_validation_predictions = TRUE,                    
+                     hyper_params = hyper_params,
+                     search_criteria = search_criteria)
+glm_models <- lapply(glm_grid@model_ids, function(model_id) h2o.getModel(model_id))
+
+# Create a list of all the base models
+models <- c(gbm_models, rf_models, glm_models)
+
+
+```
+
+Combine the base models using different metalearners.
+```{r}
+
+# Specify a defalt GLM as the metalearner
+metalearner <- "h2o.glm.wrapper"
+
+# Let's stack!
+stack <- h2o.stack(models = models, 
+                   response_frame = train_frame[, y],
+                   metalearner = metalearner)
+
+# Compute test set performance:
+perf <- h2o.ensemble_performance(stack, newdata = holdout_frame)
+print(perf)
+
+# Compare to nnls.
+stack2 <- h2o.metalearn(stack, metalearner = "h2o.glm_nn")
+perf2 <- h2o.ensemble_performance(stack2, newdata = holdout_frame, score_base_models = F)
+print(perf2)
+```
+
+## Shut down cluster
+
+```{r}
+h2o.shutdown(prompt = F)
+```
