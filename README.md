@@ -11,8 +11,8 @@
 - Week 7: SuperLearner: Part II
 - Week 8: Review
 - Week 9: h20ensemble (Chris Kennedy) + SuperLearner: Part III (David)
-- Week 10: TBA
-- Week 11: TBA
+- Week 10: Git + Amazon EC2
+- Week 11: Guest speaker 2 (BRC) -- 
 - Week 12: TBA
 - Week 13: TBA
 
