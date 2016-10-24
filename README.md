@@ -10,7 +10,7 @@
 - Week 6: SuperLearner: Part I
 - Week 7: SuperLearner: Part II
 - Week 8: Review
-- Week 9: TBA
+- Week 9: h20ensemble (Chris Kennedy) + SuperLearner: Part III (David)
 - Week 10: TBA
 - Week 11: TBA
 - Week 12: TBA
