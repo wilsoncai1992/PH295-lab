@@ -1,0 +1,40 @@
+---
+title: "Super Learner package"
+author:
+- David Benkeser & Wilson Cai
+- Department of Biostatistics, UC Berkeley
+date: "2016-10-24"
+output:
+  html_document:
+    toc: true
+    theme: journal
+    highlight: haddock
+---
+
+## I. Simple Super Learner
+
+Download the `chspred.csv` data from https://github.com/benkeser/sllecture. Recall that these data mimic a cohort of elderly participants and include various measurements that were made at baseline, as well as an indicator that participants had a myocardial infarction within five years of baseline (column `mi`).
+
+1. Set the seed using the command `set.seed(123)`. Using the `SuperLearner` package, fit a Super Learner with column `mi` as the outcome and all other variables as predictors using the option `SL.library = c(SL.glm, SL.randomForest, SL.step)` and `family = binomial()`. What algorithm was selected as discrete super learner? 
+
+2. In words, describe what each of these algorithms does to obtain a prediction function. Be sure to mention any tuning parameters that are used by the algorithms. 
+
+3. Obtain the Super Learner and discrete Super Learner predicted probability of having a myocardial infarction for a participant with average values for each of the variables (even binary variables). 
+
+
+## II. Writing Super Learner wrappers
+
+1. Using the function `simpleKern` from the Lab 4 lecture (https://github.com/wilsoncai1992/PH295-lab/tree/master/lab4), write a three wrapper functions for use with `SuperLearner` that fit a univariate kernel regression of `mi` on `age` with bandwidths of 5, 10, and 15. Be sure to also write a relevant `predict` function as well. 
+
+2. Write a screening functions that can be used with `SuperLearner` to include each of the following sets of variables: demographics (`age`, `gender`, `hsed`, and `race`), biomarkers (`logcystat`, `logtrig`, `logcrp`, `logcre`, `cysgfr`, `glu`, `ins`), and cholesterol (`ldl`, `hdl`). You should have a total of three screening functions.
+
+3. Again set the seed using `set.seed(123)`. Using the wrappers that you've written fit a Super Learner using a library consisting of the three univariate kernel regressions, as well as three main terms generalized linear models that include demographic, biomakers, and cholesterol variables respectively. Which algorithm is selected as the discrete Super Learner. 
+
+4. To ensure that your `predict` function works, obtain the Super Learner predicted probability of having a myocardial infarction for a participant with average values for each of the variables (even binary variables) using `predict.SuperLearner` with `onlySL = FALSE`. 
+
+
+## III. Cross-validating the Super Learner
+
+1. Evaluate the performance of the Super Learner used in question 2 by again setting the seed to 123, and subsequently fitting a cross-validated Super Learner (`CV.SuperLearner`) using 10-fold cross validation (`V=10`). In the ten splits, how many times was each algorithm selected as discrete Super Learner. Briefly summarize how the weights of the ten Super Learners change across folds. 
+
+2. Plot the cross-validated risk of the Super Learner, discrete super learner, and four component algorithms. Which method leads to the lowest cross-validated risk?
