@@ -1,0 +1,311 @@
+---
+title: "Super Learning for Survival Analysis"
+author: "David Benkeser"
+date: "October 26, 2016"
+output:
+    html_document:
+    toc: true
+theme: journal
+highlight: haddock
+---
+    
+## I. Introduction
+In class we have been discussing the setting that $O = (W, A, \Delta, \tilde{T} = min(T,C))$,
+where $W$ and $A$ are, as usual, the baseline covariates and the treatment assignment, $T$ is a 
+survival time of interest and $C$ is time to participant dropout of the study. We do not observe
+both $T$ and $C$, but rather only $\tilde{T}$, which is equal to whichever one occurs first. We 
+define $\Delta$ as the indicator that the occurence was an event. 
+
+In this lab, we will explore how to go about estimating the types of parameters that are often studied in these settings. 
+
+## II. Estimation with no censoring
+We will consider the `rv144` data set from that is available on my GitHub. It can be loaded into memory as follows. 
+
+```{r, message = FALSE}
+# install the development package survtmle
+library(devtools)
+install_github("benkeser/survtmle")
+library(survtmle)
+
+# load the rv144 data included with the package
+# see ?rv144 for more description
+data(rv144)
+
+# look at first rows
+head(rv144)
+
+# look at the variables ftime and ftype
+table(rv144$ftime, rv144$ftype)
+```
+
+In these data, I have labeled events `ftype` as 0 (no infection), 1 (matched infection), or 2 (mismatched infection), where match/mismatch is defined with respect to a certain amino acid position on the HIV envelope protein. We will ignore this labeling in this lab
+
+```{r}
+# re-label all events as = 1
+rv144$ftype[rv144$ftype == 2] <- 1
+```
+
+Let's estimate survival directly at two years (`ftime == 4`) as if there was no censoring. Note that I AM NOT advocating that you throw away censored data; this is simply an illustration of how we might proceed if you find yourself in the happy situation that there is no censoring in your data. 
+
+```{r}
+# new data set that excludes everyone who was censored before two years
+rv144_nocens <- rv144[!(rv144$ftime <= 4 & rv144$ftype == 0),]
+
+# how many are left?
+nrow(rv144_nocens)
+
+# look at failure times and types 
+table(rv144_nocens$ftime, rv144_nocens$ftype)
+```
+
+In this situation, we are really no different than in the case that $O = (W, A, Y = I(T > 4))$ and so we could use the standard Super Learner approach, e.g. minimizing negative log-likelihood loss.
+```{r, message = FALSE, cache = TRUE}
+# create failure time indicator
+rv144_nocens$y <- as.numeric(rv144_nocens$ftime > 4)
+
+# fit Super Learner
+library(SuperLearner)
+sl1 <- SuperLearner(
+    Y = rv144_nocens$y, 
+    X = rv144_nocens[,c("vax","male","year04","year05",
+                        "medRisk","highRisk","medAge","highAge")], 
+    family = binomial(),
+    SL.library = c("SL.glm","SL.mean","SL.gam") # just use simple library for illustration
+)
+
+sl1
+```
+
+## III. Estimation with censoring
+Now we will consider estimation of survival at two years via IPC regression. As in class, let $\bar{G}(t | A, W) = P(C \ge t | A, W)$ be the probability of remaining uncensored until time $t$. In practice, it is uncommon that this censoring distribution is known; it must be estimated from the data. Here we do this using a simple Kaplan-Meier estimator by vaccine arm. 
+
+```{r}
+# need the survival package
+library(survival)
+
+# kaplan-meier fit in each vaccine arm
+km <- survfit(Surv(ftime, ftype==0) ~ vax, data = rv144)
+
+# look at the output
+km.summ <- summary(km)
+```
+
+Note that the survival probability is $P(C > t | A, W)$, whereas we want $P(C \ge t | A, W)$.
+
+```{r}
+# correct estimates to be P(C >= t | A, W)
+km.vax0 <- c(1, km.summ$surv[1:5])
+km.vax1 <- c(1, km.summ$surv[7:11])
+
+# make a column in data set for G.t
+# first put an empty column in
+rv144$G.t <- NA
+# now replace values at each time in vax = 0 and 1 groups
+for(time in 1:6){
+    n.vax0 <- sum(rv144$ftime == time & rv144$vax == 0)
+    n.vax1 <- sum(rv144$ftime == time & rv144$vax == 1)
+    rv144$G.t[rv144$ftime == time & rv144$vax == 0] <- rep(km.vax0[time], n.vax0)
+    rv144$G.t[rv144$ftime == time & rv144$vax == 1] <- rep(km.vax1[time], n.vax1)
+}
+
+# look at what we added
+head(rv144)
+```
+
+We can now define an IPC weight.
+
+```{r}
+# add in weight to data frame
+rv144$ipcWeight1 <- as.numeric(rv144$ftype==1)/rv144$G.t
+
+# summary of weights
+summary(rv144$ipcWeight1)
+
+# how many are non-zero?
+sum(rv144$ipcWeight1 > 0)
+```
+
+Now we can fit a Super Learner based on the IPCW loss function. 
+
+```{r, cache = TRUE, warning = FALSE}
+# create failure time indicator
+rv144$y <- as.numeric(rv144$ftime > 4)
+
+# fit Super Learner with obsWeights
+sl2 <- SuperLearner(
+    Y = rv144$y, 
+    X = rv144[,c("vax","male","year04","year05",
+                 "medRisk","highRisk","medAge","highAge")], 
+    family = binomial(),
+    SL.library = c("SL.glm","SL.mean","SL.gam"), # just use simple library for illustration
+    obsWeights = rv144$ipcWeight1
+)
+
+sl2
+
+# get survival predictions for everyone
+S.t0.ipcw1 <- sl2$SL.predict
+
+```
+
+Note that this IPC implementation is not exactly correct, as we have treated the weights as known, when they were in fact estimated. We should be computing the estimated weights on the training sample and evaluting the loss on the validation sample. However, I don't know of a way to do this, except hard coding it by hand (possible future HW assignment?!?). 
+
+We could alternatively use the improved IPCW weights. 
+
+```{r, cache = TRUE, warning = FALSE}
+# G.t.t0 is P(min(\tilde{T}, t0) \ge t | A, W) 
+rv144$G.t.t0 <- rv144$G.t
+
+rv144$G.t.t0[rv144$ftime > 4 & rv144$vax == 0] <- km.vax0[4]
+rv144$G.t.t0[rv144$ftime > 4 & rv144$vax == 1] <- km.vax1[4]
+
+# add in weight to data frame
+rv144$ipcWeight2 <- (as.numeric(rv144$ftype==1 & rv144$ftime <= 4) + 
+    as.numeric(rv144$ftime > 4))/rv144$G.t.t0
+
+# summarize weights
+summary(rv144$ipcWeight2)
+
+# how many are non-zero?
+sum(rv144$ipcWeight2 > 0)
+
+# fit Super Learner with obsWeights
+sl3 <- SuperLearner(
+    Y = rv144$y, 
+    X = rv144[,c("vax","male","year04","year05",
+                 "medRisk","highRisk","medAge","highAge")], 
+    family = binomial(),
+    SL.library = c("SL.glm","SL.mean","SL.gam"), # just use simple library for illustration
+    obsWeights = rv144$ipcWeight2
+)
+
+sl3
+
+# get survival predictions for everyone
+S.t0.ipcw2 <- sl3$SL.predict
+```
+
+The same comments as above apply here -- we really should be cross-validating the weight estimation. 
+
+## IV. Estimation via hazards -- no pooling
+
+Another way to estimate conditional survival is to estimate the conditional hazard function $$
+\tilde{\lambda}(t | A, W) = P(\tilde{T} = t | \tilde{T} \ge t, A, W)
+$$ 
+and transform into an estimate of hazard via the relationship $$
+S(t | A, W) = \prod_{t=1}^{t_0} (1 - \tilde{\lambda}(t | A, W)) \ , 
+$$
+which will be true assuming $T \perp C | A, W$. 
+
+The hazards can be estimated for each time separately as follows. 
+```{r, cache = TRUE}
+# function that estimates the hazards at a particular time
+do.onetime <- function(time){
+    # only consider data with ftime >= time
+    tmp <- rv144[rv144$ftime >= time,]
+    
+    # fit super learner
+    sl <- SuperLearner(
+        # outcome is failure at time
+        Y = as.numeric(tmp$ftime==time),
+        X = tmp[,c("vax","male","year04","year05",
+                   "medRisk","highRisk","medAge","highAge")], 
+        family = binomial(),
+        SL.library = c("SL.glm","SL.mean","SL.gam") # just use simple library for illustration
+        )
+    
+    #return the object
+    return(sl)
+}
+
+# now run at first four times 
+hazOut <- vector(mode = "list", length = 4)
+for(time in 1:4){
+    hazOut[[time]] <- do.onetime(time = time)
+}
+
+# look at hazard at time 1 fit
+hazOut[[1]]
+
+# look at hazard at time 4 fit
+hazOut[[4]]
+```
+
+Now let's map these predictions back into survival estimates
+```{r}
+# get 1 - predicted hazards for everyone in the data set at times 1-4
+oneMinusHaz <- vector(mode = "list", length = 4)
+for(time in 1:4){
+    oneMinusHaz[[time]] <- 1 - predict(
+        hazOut[[time]], 
+        newdata = rv144[,c("vax","male","year04","year05",
+                           "medRisk","highRisk","medAge","highAge")]
+        )[[1]]
+}
+
+# survival probabilities at observations
+S.t0.haz1 <- Reduce("*",oneMinusHaz)
+```
+
+
+## V. Estimation via hazards -- pooling
+Another, potentially more powerful, way to estimate the hazards is by borrowing information across time points. This method requires a bit more effort up front to set up the data sets properly, but I have written some helper functions in the past that will make it easier. 
+
+```{r, cache = TRUE}
+# make a long format data frame using a function from the 
+# survtmle package. 
+
+# first rename vax to trt for consistency with the internal call to 
+# makeDataList within the survtmle function
+rv144$trt <- rv144$vax
+# add an id variable 
+rv144$id <- 1:nrow(rv144)
+
+# make long data frames
+longDataList <- makeDataList(
+    dat = rv144, 
+    # can ignore these options or see ?makeDataList for more info
+    J = 1, ntrt = 2, uniqtrt = c(0,1), bounds = NULL,
+    t0 = 4
+)
+
+# the output is a list with three data.frames, we'll use the first
+longData <- longDataList[[1]]
+
+# take a look at what it made -- notice the new column t for time
+# notice that C is an indicator of a censoring event
+longData[longData$id == 1,]
+# there are only as many rows as time points for each observation
+longData[longData$id == 5,]
+# N1 is an indicator of an infection at time
+longData[longData$id==137,]
+
+# now we can fit a single super learner for all hazard estimations
+# regression on A, W, and t
+sl4 <- SuperLearner(
+    Y = longData$N1, 
+    X = longData[,c("t","vax","male","year04","year05",
+                    "medRisk","highRisk","medAge","highAge")],
+    family = binomial(),
+    SL.library = c("SL.glm","SL.mean","SL.gam"),
+    id = longData$id # make sure the splitting is done by person, not row
+)
+
+# make a long form data set to get predictions back
+newdata <- rv144[sort(rep(1:nrow(rv144),4)),c("vax","male","year04","year05",
+                    "medRisk","highRisk","medAge","highAge")]
+newdata$t <- rep(1:4, nrow(rv144))
+
+# get predictions
+longHazEst <- data.frame(
+    id = sort(rep(1:nrow(rv144),4)),
+    oneMinusHaz = 1 - predict(sl4, newdata = newdata)[[1]]
+)
+
+# get survival predictions at observations
+S.t0.haz2 <- c(by(longHazEst, factor(longHazEst$id), function(x){
+    prod(x$oneMinusHaz)
+}))
+```
+
+
