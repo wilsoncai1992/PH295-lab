@@ -145,7 +145,6 @@ sl2
 
 # get survival predictions for everyone
 S.t0.ipcw1 <- sl2$SL.predict
-
 ```
 
 Note that this IPC implementation is not exactly correct, as we have treated the weights as known, when they were in fact estimated. We should be computing the estimated weights on the training sample and evaluting the loss on the validation sample. However, I don't know of a way to do this, except hard coding it by hand (possible future HW assignment?!?). 
@@ -190,10 +189,10 @@ The same comments as above apply here -- we really should be cross-validating th
 ## IV. Estimation via hazards -- no pooling
 
 Another way to estimate conditional survival is to estimate the conditional hazard function $$
-\tilde{\lambda}(t | A, W) = P(\tilde{T} = t | \tilde{T} \ge t, A, W)
+\tilde{\lambda}(t | A, W) = P(\tilde{T} = t, \Delta = 1 | \tilde{T} \ge t, A, W)
 $$ 
 and transform into an estimate of hazard via the relationship $$
-S(t | A, W) = \prod_{t=1}^{t_0} (1 - \tilde{\lambda}(t | A, W)) \ , 
+S(t_0 | A, W) = \prod_{t=1}^{t_0} (1 - \tilde{\lambda}(t | A, W)) \ , 
 $$
 which will be true assuming $T \perp C | A, W$. 
 
@@ -207,7 +206,7 @@ do.onetime <- function(time){
     # fit super learner
     sl <- SuperLearner(
         # outcome is failure at time
-        Y = as.numeric(tmp$ftime==time),
+        Y = as.numeric(tmp$ftime==time & tmp$ftype == 1),
         X = tmp[,c("vax","male","year04","year05",
                    "medRisk","highRisk","medAge","highAge")], 
         family = binomial(),
@@ -275,6 +274,7 @@ longData <- longDataList[[1]]
 # take a look at what it made -- notice the new column t for time
 # notice that C is an indicator of a censoring event
 longData[longData$id == 1,]
+
 # there are only as many rows as time points for each observation
 longData[longData$id == 5,]
 # N1 is an indicator of an infection at time

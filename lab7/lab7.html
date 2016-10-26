@@ -202,9 +202,9 @@ sl1</code></pre>
 ## 
 ## 
 ##                    Risk      Coef
-## SL.glm_All  0.004359657 0.0000000
-## SL.mean_All 0.004359753 0.4950573
-## SL.gam_All  0.004359657 0.5049427</code></pre>
+## SL.glm_All  0.004363033 0.0000000
+## SL.mean_All 0.004360733 0.6165169
+## SL.gam_All  0.004363033 0.3834831</code></pre>
 </div>
 <div id="iii.-estimation-with-censoring" class="section level2">
 <h2>III. Estimation with censoring</h2>
@@ -284,9 +284,9 @@ sl2</code></pre>
 ## 
 ## 
 ##                    Risk      Coef
-## SL.glm_All  0.001914700 0.0000000
-## SL.mean_All 0.001876161 0.5564911
-## SL.gam_All  0.001914700 0.4435089</code></pre>
+## SL.glm_All  0.002011415 0.2868011
+## SL.mean_All 0.001886378 0.7131989
+## SL.gam_All  0.002011415 0.0000000</code></pre>
 <pre class="r"><code># get survival predictions for everyone
 S.t0.ipcw1 &lt;- sl2$SL.predict</code></pre>
 <p>Note that this IPC implementation is not exactly correct, as we have treated the weights as known, when they were in fact estimated. We should be computing the estimated weights on the training sample and evaluting the loss on the validation sample. However, I don’t know of a way to do this, except hard coding it by hand (possible future HW assignment?!?).</p>
@@ -328,9 +328,9 @@ sl3</code></pre>
 ## 
 ## 
 ##                    Risk      Coef
-## SL.glm_All  0.004118893 0.0000000
-## SL.mean_All 0.004119284 0.4783663
-## SL.gam_All  0.004118893 0.5216337</code></pre>
+## SL.glm_All  0.004118024 0.0000000
+## SL.mean_All 0.004119246 0.4321047
+## SL.gam_All  0.004118024 0.5678953</code></pre>
 <pre class="r"><code># get survival predictions for everyone
 S.t0.ipcw2 &lt;- sl3$SL.predict</code></pre>
 <p>The same comments as above apply here – we really should be cross-validating the weight estimation.</p>
@@ -338,9 +338,9 @@ S.t0.ipcw2 &lt;- sl3$SL.predict</code></pre>
 <div id="iv.-estimation-via-hazards-no-pooling" class="section level2">
 <h2>IV. Estimation via hazards – no pooling</h2>
 <p>Another way to estimate conditional survival is to estimate the conditional hazard function <span class="math display">\[
-\tilde{\lambda}(t | A, W) = P(\tilde{T} = t | \tilde{T} \ge t, A, W)
+\tilde{\lambda}(t | A, W) = P(\tilde{T} = t, \Delta = 1 | \tilde{T} \ge t, A, W)
 \]</span> and transform into an estimate of hazard via the relationship <span class="math display">\[
-S(t | A, W) = \prod_{t=1}^{t_0} (1 - \tilde{\lambda}(t | A, W)) \ , 
+S(t_0 | A, W) = \prod_{t=1}^{t_0} (1 - \tilde{\lambda}(t | A, W)) \ , 
 \]</span> which will be true assuming <span class="math inline">\(T \perp C | A, W\)</span>.</p>
 <p>The hazards can be estimated for each time separately as follows.</p>
 <pre class="r"><code># function that estimates the hazards at a particular time
@@ -351,7 +351,7 @@ do.onetime &lt;- function(time){
     # fit super learner
     sl &lt;- SuperLearner(
         # outcome is failure at time
-        Y = as.numeric(tmp$ftime==time),
+        Y = as.numeric(tmp$ftime==time &amp; tmp$ftype == 1),
         X = tmp[,c(&quot;vax&quot;,&quot;male&quot;,&quot;year04&quot;,&quot;year05&quot;,
                    &quot;medRisk&quot;,&quot;highRisk&quot;,&quot;medAge&quot;,&quot;highAge&quot;)], 
         family = binomial(),
@@ -366,34 +366,36 @@ do.onetime &lt;- function(time){
 hazOut &lt;- vector(mode = &quot;list&quot;, length = 4)
 for(time in 1:4){
     hazOut[[time]] &lt;- do.onetime(time = time)
-}
-
-# look at hazard at time 1 fit
+}</code></pre>
+<pre><code>## Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</code></pre>
+<pre class="r"><code># look at hazard at time 1 fit
 hazOut[[1]]</code></pre>
 <pre><code>## 
 ## Call:  
-## SuperLearner(Y = as.numeric(tmp$ftime == time), X = tmp[, c(&quot;vax&quot;, &quot;male&quot;,  
-##     &quot;year04&quot;, &quot;year05&quot;, &quot;medRisk&quot;, &quot;highRisk&quot;, &quot;medAge&quot;, &quot;highAge&quot;)],  
-##     family = binomial(), SL.library = c(&quot;SL.glm&quot;, &quot;SL.mean&quot;, &quot;SL.gam&quot;)) 
+## SuperLearner(Y = as.numeric(tmp$ftime == time &amp; tmp$ftype == 1), X = tmp[,  
+##     c(&quot;vax&quot;, &quot;male&quot;, &quot;year04&quot;, &quot;year05&quot;, &quot;medRisk&quot;, &quot;highRisk&quot;, &quot;medAge&quot;,  
+##         &quot;highAge&quot;)], family = binomial(), SL.library = c(&quot;SL.glm&quot;, &quot;SL.mean&quot;,  
+##     &quot;SL.gam&quot;)) 
 ## 
 ## 
-##                   Risk    Coef
-## SL.glm_All  0.01311710 0.32119
-## SL.mean_All 0.01311249 0.67881
-## SL.gam_All  0.01311710 0.00000</code></pre>
+##                     Risk      Coef
+## SL.glm_All  0.0008767593 0.5335614
+## SL.mean_All 0.0008767753 0.4664386
+## SL.gam_All  0.0008767593 0.0000000</code></pre>
 <pre class="r"><code># look at hazard at time 4 fit
 hazOut[[4]]</code></pre>
 <pre><code>## 
 ## Call:  
-## SuperLearner(Y = as.numeric(tmp$ftime == time), X = tmp[, c(&quot;vax&quot;, &quot;male&quot;,  
-##     &quot;year04&quot;, &quot;year05&quot;, &quot;medRisk&quot;, &quot;highRisk&quot;, &quot;medAge&quot;, &quot;highAge&quot;)],  
-##     family = binomial(), SL.library = c(&quot;SL.glm&quot;, &quot;SL.mean&quot;, &quot;SL.gam&quot;)) 
+## SuperLearner(Y = as.numeric(tmp$ftime == time &amp; tmp$ftype == 1), X = tmp[,  
+##     c(&quot;vax&quot;, &quot;male&quot;, &quot;year04&quot;, &quot;year05&quot;, &quot;medRisk&quot;, &quot;highRisk&quot;, &quot;medAge&quot;,  
+##         &quot;highAge&quot;)], family = binomial(), SL.library = c(&quot;SL.glm&quot;, &quot;SL.mean&quot;,  
+##     &quot;SL.gam&quot;)) 
 ## 
 ## 
-##                   Risk      Coef
-## SL.glm_All  0.04324611 0.3729602
-## SL.mean_All 0.04323597 0.6270398
-## SL.gam_All  0.04324611 0.0000000</code></pre>
+##                    Risk      Coef
+## SL.glm_All  0.001033091 0.3204421
+## SL.mean_All 0.001032578 0.6795579
+## SL.gam_All  0.001033091 0.0000000</code></pre>
 <p>Now let’s map these predictions back into survival estimates</p>
 <pre class="r"><code># get 1 - predicted hazards for everyone in the data set at times 1-4
 oneMinusHaz &lt;- vector(mode = &quot;list&quot;, length = 4)
