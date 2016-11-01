@@ -1,0 +1,1572 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>@font-face {
+  font-family: octicons-anchor;
+  src: url(data:font/woff;charset=utf-8;base64,d09GRgABAAAAAAYcAA0AAAAACjQAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAABGRlRNAAABMAAAABwAAAAca8vGTk9TLzIAAAFMAAAARAAAAFZG1VHVY21hcAAAAZAAAAA+AAABQgAP9AdjdnQgAAAB0AAAAAQAAAAEACICiGdhc3AAAAHUAAAACAAAAAj//wADZ2x5ZgAAAdwAAADRAAABEKyikaNoZWFkAAACsAAAAC0AAAA2AtXoA2hoZWEAAALgAAAAHAAAACQHngNFaG10eAAAAvwAAAAQAAAAEAwAACJsb2NhAAADDAAAAAoAAAAKALIAVG1heHAAAAMYAAAAHwAAACABEAB2bmFtZQAAAzgAAALBAAAFu3I9x/Nwb3N0AAAF/AAAAB0AAAAvaoFvbwAAAAEAAAAAzBdyYwAAAADP2IQvAAAAAM/bz7t4nGNgZGFgnMDAysDB1Ml0hoGBoR9CM75mMGLkYGBgYmBlZsAKAtJcUxgcPsR8iGF2+O/AEMPsznAYKMwIkgMA5REMOXicY2BgYGaAYBkGRgYQsAHyGMF8FgYFIM0ChED+h5j//yEk/3KoSgZGNgYYk4GRCUgwMaACRoZhDwCs7QgGAAAAIgKIAAAAAf//AAJ4nHWMMQrCQBBF/0zWrCCIKUQsTDCL2EXMohYGSSmorScInsRGL2DOYJe0Ntp7BK+gJ1BxF1stZvjz/v8DRghQzEc4kIgKwiAppcA9LtzKLSkdNhKFY3HF4lK69ExKslx7Xa+vPRVS43G98vG1DnkDMIBUgFN0MDXflU8tbaZOUkXUH0+U27RoRpOIyCKjbMCVejwypzJJG4jIwb43rfl6wbwanocrJm9XFYfskuVC5K/TPyczNU7b84CXcbxks1Un6H6tLH9vf2LRnn8Ax7A5WQAAAHicY2BkYGAA4teL1+yI57f5ysDNwgAC529f0kOmWRiYVgEpDgYmEA8AUzEKsQAAAHicY2BkYGB2+O/AEMPCAAJAkpEBFbAAADgKAe0EAAAiAAAAAAQAAAAEAAAAAAAAKgAqACoAiAAAeJxjYGRgYGBhsGFgYgABEMkFhAwM/xn0QAIAD6YBhwB4nI1Ty07cMBS9QwKlQapQW3VXySvEqDCZGbGaHULiIQ1FKgjWMxknMfLEke2A+IJu+wntrt/QbVf9gG75jK577Lg8K1qQPCfnnnt8fX1NRC/pmjrk/zprC+8D7tBy9DHgBXoWfQ44Av8t4Bj4Z8CLtBL9CniJluPXASf0Lm4CXqFX8Q84dOLnMB17N4c7tBo1AS/Qi+hTwBH4rwHHwN8DXqQ30XXAS7QaLwSc0Gn8NuAVWou/gFmnjLrEaEh9GmDdDGgL3B4JsrRPDU2hTOiMSuJUIdKQQayiAth69r6akSSFqIJuA19TrzCIaY8sIoxyrNIrL//pw7A2iMygkX5vDj+G+kuoLdX4GlGK/8Lnlz6/h9MpmoO9rafrz7ILXEHHaAx95s9lsI7AHNMBWEZHULnfAXwG9/ZqdzLI08iuwRloXE8kfhXYAvE23+23DU3t626rbs8/8adv+9DWknsHp3E17oCf+Z48rvEQNZ78paYM38qfk3v/u3l3u3GXN2Dmvmvpf1Srwk3pB/VSsp512bA/GG5i2WJ7wu430yQ5K3nFGiOqgtmSB5pJVSizwaacmUZzZhXLlZTq8qGGFY2YcSkqbth6aW1tRmlaCFs2016m5qn36SbJrqosG4uMV4aP2PHBmB3tjtmgN2izkGQyLWprekbIntJFing32a5rKWCN/SdSoga45EJykyQ7asZvHQ8PTm6cslIpwyeyjbVltNikc2HTR7YKh9LBl9DADC0U/jLcBZDKrMhUBfQBvXRzLtFtjU9eNHKin0x5InTqb8lNpfKv1s1xHzTXRqgKzek/mb7nB8RZTCDhGEX3kK/8Q75AmUM/eLkfA+0Hi908Kx4eNsMgudg5GLdRD7a84npi+YxNr5i5KIbW5izXas7cHXIMAau1OueZhfj+cOcP3P8MNIWLyYOBuxL6DRylJ4cAAAB4nGNgYoAALjDJyIAOWMCiTIxMLDmZedkABtIBygAAAA==) format('woff');
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    width: 980px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+body .markdown-body {
+    padding: 45px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    word-wrap: break-word;
+}
+
+pre {
+    font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+
+.markdown-body {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  color: #333;
+  font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-size: 16px;
+  line-height: 1.6;
+  word-wrap: break-word;
+}
+
+.markdown-body a {
+  background-color: transparent;
+}
+
+.markdown-body a:active,
+.markdown-body a:hover {
+  outline: 0;
+}
+
+.markdown-body strong {
+  font-weight: bold;
+}
+
+.markdown-body h1 {
+  font-size: 2em;
+  margin: 0.67em 0;
+}
+
+.markdown-body img {
+  border: 0;
+}
+
+.markdown-body hr {
+  box-sizing: content-box;
+  height: 0;
+}
+
+.markdown-body pre {
+  overflow: auto;
+}
+
+.markdown-body code,
+.markdown-body kbd,
+.markdown-body pre {
+  font-family: monospace, monospace;
+  font-size: 1em;
+}
+
+.markdown-body input {
+  color: inherit;
+  font: inherit;
+  margin: 0;
+}
+
+.markdown-body html input[disabled] {
+  cursor: default;
+}
+
+.markdown-body input {
+  line-height: normal;
+}
+
+.markdown-body input[type="checkbox"] {
+  box-sizing: border-box;
+  padding: 0;
+}
+
+.markdown-body table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+.markdown-body td,
+.markdown-body th {
+  padding: 0;
+}
+
+.markdown-body input {
+  font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+.markdown-body a {
+  color: #4078c0;
+  text-decoration: none;
+}
+
+.markdown-body a:hover,
+.markdown-body a:active {
+  text-decoration: underline;
+}
+
+.markdown-body hr {
+  height: 0;
+  margin: 15px 0;
+  overflow: hidden;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.markdown-body hr:before {
+  display: table;
+  content: "";
+}
+
+.markdown-body hr:after {
+  display: table;
+  clear: both;
+  content: "";
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+  margin-top: 15px;
+  margin-bottom: 15px;
+  line-height: 1.1;
+}
+
+.markdown-body h1 {
+  font-size: 30px;
+}
+
+.markdown-body h2 {
+  font-size: 21px;
+}
+
+.markdown-body h3 {
+  font-size: 16px;
+}
+
+.markdown-body h4 {
+  font-size: 14px;
+}
+
+.markdown-body h5 {
+  font-size: 12px;
+}
+
+.markdown-body h6 {
+  font-size: 11px;
+}
+
+.markdown-body blockquote {
+  margin: 0;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  padding: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.markdown-body ol ol,
+.markdown-body ul ol {
+  list-style-type: lower-roman;
+}
+
+.markdown-body ul ul ol,
+.markdown-body ul ol ol,
+.markdown-body ol ul ol,
+.markdown-body ol ol ol {
+  list-style-type: lower-alpha;
+}
+
+.markdown-body dd {
+  margin-left: 0;
+}
+
+.markdown-body code {
+  font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-size: 12px;
+}
+
+.markdown-body pre {
+  margin-top: 0;
+  margin-bottom: 0;
+  font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+
+.markdown-body .select::-ms-expand {
+  opacity: 0;
+}
+
+.markdown-body .octicon {
+  font: normal normal normal 16px/1 octicons-anchor;
+  display: inline-block;
+  text-decoration: none;
+  text-rendering: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.markdown-body .octicon-link:before {
+  content: '\f05c';
+}
+
+.markdown-body:before {
+  display: table;
+  content: "";
+}
+
+.markdown-body:after {
+  display: table;
+  clear: both;
+  content: "";
+}
+
+.markdown-body>*:first-child {
+  margin-top: 0 !important;
+}
+
+.markdown-body>*:last-child {
+  margin-bottom: 0 !important;
+}
+
+.markdown-body a:not([href]) {
+  color: inherit;
+  text-decoration: none;
+}
+
+.markdown-body .anchor {
+  display: inline-block;
+  padding-right: 2px;
+  margin-left: -18px;
+}
+
+.markdown-body .anchor:focus {
+  outline: none;
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+  margin-top: 1em;
+  margin-bottom: 16px;
+  font-weight: bold;
+  line-height: 1.4;
+}
+
+.markdown-body h1 .octicon-link,
+.markdown-body h2 .octicon-link,
+.markdown-body h3 .octicon-link,
+.markdown-body h4 .octicon-link,
+.markdown-body h5 .octicon-link,
+.markdown-body h6 .octicon-link {
+  color: #000;
+  vertical-align: middle;
+  visibility: hidden;
+}
+
+.markdown-body h1:hover .anchor,
+.markdown-body h2:hover .anchor,
+.markdown-body h3:hover .anchor,
+.markdown-body h4:hover .anchor,
+.markdown-body h5:hover .anchor,
+.markdown-body h6:hover .anchor {
+  text-decoration: none;
+}
+
+.markdown-body h1:hover .anchor .octicon-link,
+.markdown-body h2:hover .anchor .octicon-link,
+.markdown-body h3:hover .anchor .octicon-link,
+.markdown-body h4:hover .anchor .octicon-link,
+.markdown-body h5:hover .anchor .octicon-link,
+.markdown-body h6:hover .anchor .octicon-link {
+  visibility: visible;
+}
+
+.markdown-body h1 {
+  padding-bottom: 0.3em;
+  font-size: 2.25em;
+  line-height: 1.2;
+  border-bottom: 1px solid #eee;
+}
+
+.markdown-body h1 .anchor {
+  line-height: 1;
+}
+
+.markdown-body h2 {
+  padding-bottom: 0.3em;
+  font-size: 1.75em;
+  line-height: 1.225;
+  border-bottom: 1px solid #eee;
+}
+
+.markdown-body h2 .anchor {
+  line-height: 1;
+}
+
+.markdown-body h3 {
+  font-size: 1.5em;
+  line-height: 1.43;
+}
+
+.markdown-body h3 .anchor {
+  line-height: 1.2;
+}
+
+.markdown-body h4 {
+  font-size: 1.25em;
+}
+
+.markdown-body h4 .anchor {
+  line-height: 1.2;
+}
+
+.markdown-body h5 {
+  font-size: 1em;
+}
+
+.markdown-body h5 .anchor {
+  line-height: 1.1;
+}
+
+.markdown-body h6 {
+  font-size: 1em;
+  color: #777;
+}
+
+.markdown-body h6 .anchor {
+  line-height: 1.1;
+}
+
+.markdown-body p,
+.markdown-body blockquote,
+.markdown-body ul,
+.markdown-body ol,
+.markdown-body dl,
+.markdown-body table,
+.markdown-body pre {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.markdown-body hr {
+  height: 4px;
+  padding: 0;
+  margin: 16px 0;
+  background-color: #e7e7e7;
+  border: 0 none;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  padding-left: 2em;
+}
+
+.markdown-body ul ul,
+.markdown-body ul ol,
+.markdown-body ol ol,
+.markdown-body ol ul {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.markdown-body li>p {
+  margin-top: 16px;
+}
+
+.markdown-body dl {
+  padding: 0;
+}
+
+.markdown-body dl dt {
+  padding: 0;
+  margin-top: 16px;
+  font-size: 1em;
+  font-style: italic;
+  font-weight: bold;
+}
+
+.markdown-body dl dd {
+  padding: 0 16px;
+  margin-bottom: 16px;
+}
+
+.markdown-body blockquote {
+  padding: 0 15px;
+  color: #777;
+  border-left: 4px solid #ddd;
+}
+
+.markdown-body blockquote>:first-child {
+  margin-top: 0;
+}
+
+.markdown-body blockquote>:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-body table {
+  display: block;
+  width: 100%;
+  overflow: auto;
+  word-break: normal;
+  word-break: keep-all;
+}
+
+.markdown-body table th {
+  font-weight: bold;
+}
+
+.markdown-body table th,
+.markdown-body table td {
+  padding: 6px 13px;
+  border: 1px solid #ddd;
+}
+
+.markdown-body table tr {
+  background-color: #fff;
+  border-top: 1px solid #ccc;
+}
+
+.markdown-body table tr:nth-child(2n) {
+  background-color: #f8f8f8;
+}
+
+.markdown-body img {
+  max-width: 100%;
+  box-sizing: content-box;
+  background-color: #fff;
+}
+
+.markdown-body code {
+  padding: 0;
+  padding-top: 0.2em;
+  padding-bottom: 0.2em;
+  margin: 0;
+  font-size: 85%;
+  background-color: rgba(0,0,0,0.04);
+  border-radius: 3px;
+}
+
+.markdown-body code:before,
+.markdown-body code:after {
+  letter-spacing: -0.2em;
+  content: "\00a0";
+}
+
+.markdown-body pre>code {
+  padding: 0;
+  margin: 0;
+  font-size: 100%;
+  word-break: normal;
+  white-space: pre;
+  background: transparent;
+  border: 0;
+}
+
+.markdown-body .highlight {
+  margin-bottom: 16px;
+}
+
+.markdown-body .highlight pre,
+.markdown-body pre {
+  padding: 16px;
+  overflow: auto;
+  font-size: 85%;
+  line-height: 1.45;
+  background-color: #f7f7f7;
+  border-radius: 3px;
+}
+
+.markdown-body .highlight pre {
+  margin-bottom: 0;
+  word-break: normal;
+}
+
+.markdown-body pre {
+  word-wrap: normal;
+}
+
+.markdown-body pre code {
+  display: inline;
+  max-width: initial;
+  padding: 0;
+  margin: 0;
+  overflow: initial;
+  line-height: inherit;
+  word-wrap: normal;
+  background-color: transparent;
+  border: 0;
+}
+
+.markdown-body pre code:before,
+.markdown-body pre code:after {
+  content: normal;
+}
+
+.markdown-body kbd {
+  display: inline-block;
+  padding: 3px 5px;
+  font-size: 11px;
+  line-height: 10px;
+  color: #555;
+  vertical-align: middle;
+  background-color: #fcfcfc;
+  border: solid 1px #ccc;
+  border-bottom-color: #bbb;
+  border-radius: 3px;
+  box-shadow: inset 0 -1px 0 #bbb;
+}
+
+.markdown-body .pl-c {
+  color: #969896;
+}
+
+.markdown-body .pl-c1,
+.markdown-body .pl-s .pl-v {
+  color: #0086b3;
+}
+
+.markdown-body .pl-e,
+.markdown-body .pl-en {
+  color: #795da3;
+}
+
+.markdown-body .pl-s .pl-s1,
+.markdown-body .pl-smi {
+  color: #333;
+}
+
+.markdown-body .pl-ent {
+  color: #63a35c;
+}
+
+.markdown-body .pl-k {
+  color: #a71d5d;
+}
+
+.markdown-body .pl-pds,
+.markdown-body .pl-s,
+.markdown-body .pl-s .pl-pse .pl-s1,
+.markdown-body .pl-sr,
+.markdown-body .pl-sr .pl-cce,
+.markdown-body .pl-sr .pl-sra,
+.markdown-body .pl-sr .pl-sre {
+  color: #183691;
+}
+
+.markdown-body .pl-v {
+  color: #ed6a43;
+}
+
+.markdown-body .pl-id {
+  color: #b52a1d;
+}
+
+.markdown-body .pl-ii {
+  background-color: #b52a1d;
+  color: #f8f8f8;
+}
+
+.markdown-body .pl-sr .pl-cce {
+  color: #63a35c;
+  font-weight: bold;
+}
+
+.markdown-body .pl-ml {
+  color: #693a17;
+}
+
+.markdown-body .pl-mh,
+.markdown-body .pl-mh .pl-en,
+.markdown-body .pl-ms {
+  color: #1d3e81;
+  font-weight: bold;
+}
+
+.markdown-body .pl-mq {
+  color: #008080;
+}
+
+.markdown-body .pl-mi {
+  color: #333;
+  font-style: italic;
+}
+
+.markdown-body .pl-mb {
+  color: #333;
+  font-weight: bold;
+}
+
+.markdown-body .pl-md {
+  background-color: #ffecec;
+  color: #bd2c00;
+}
+
+.markdown-body .pl-mi1 {
+  background-color: #eaffea;
+  color: #55a532;
+}
+
+.markdown-body .pl-mdr {
+  color: #795da3;
+  font-weight: bold;
+}
+
+.markdown-body .pl-mo {
+  color: #1d3e81;
+}
+
+.markdown-body kbd {
+  display: inline-block;
+  padding: 3px 5px;
+  font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  line-height: 10px;
+  color: #555;
+  vertical-align: middle;
+  background-color: #fcfcfc;
+  border: solid 1px #ccc;
+  border-bottom-color: #bbb;
+  border-radius: 3px;
+  box-shadow: inset 0 -1px 0 #bbb;
+}
+
+.markdown-body .plan-price-unit {
+  color: #767676;
+  font-weight: normal;
+}
+
+.markdown-body .task-list-item {
+  list-style-type: none;
+}
+
+.markdown-body .task-list-item+.task-list-item {
+  margin-top: 3px;
+}
+
+.markdown-body .task-list-item input {
+  margin: 0 0.35em 0.25em -1.6em;
+  vertical-align: middle;
+}
+
+.markdown-body .plan-choice {
+  padding: 15px;
+  padding-left: 40px;
+  display: block;
+  border: 1px solid #e0e0e0;
+  position: relative;
+  font-weight: normal;
+  background-color: #fafafa;
+}
+
+.markdown-body .plan-choice.open {
+  background-color: #fff;
+}
+
+.markdown-body .plan-choice.open .plan-choice-seat-breakdown {
+  display: block;
+}
+
+.markdown-body .plan-choice-free {
+  border-radius: 3px 3px 0 0;
+}
+
+.markdown-body .plan-choice-paid {
+  border-radius: 0 0 3px 3px;
+  border-top: 0;
+  margin-bottom: 20px;
+}
+
+.markdown-body .plan-choice-radio {
+  position: absolute;
+  left: 15px;
+  top: 18px;
+}
+
+.markdown-body .plan-choice-exp {
+  color: #999;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.markdown-body .plan-choice-seat-breakdown {
+  margin-top: 10px;
+  display: none;
+}
+
+.markdown-body :checked+.radio-label {
+  z-index: 1;
+  position: relative;
+  border-color: #4078c0;
+}
+</style><title>git-intro</title></head><body><article class="markdown-body"><h1>
+<a id="user-content-introduction-to-git-" class="anchor" href="#introduction-to-git-" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Introduction to Git </h1>
+
+<p>Wilson Cai</p>
+
+<p>2016-11-02</p>
+
+<blockquote>
+<p><strong>note</strong></p>
+
+<p>The content of this tutorial was adapted from Berkeley Statistics Department's <a href="https://github.com/berkeley-scf/tutorial-git-basics">Git Basics Tutorial</a>, and Fernando Pérez' <a href="https://github.com/fperez/reprosw/blob/master/Version%20Control.ipynb">Lecture
+notes (in IPython Notebook format) on Reproducible Science And Modern
+Scientific
+Software</a>.</p>
+
+<p>Before reading this, you will want to be familiar with the material in
+the "Basics of UNIX" tutorial and screencast here:
+<a href="http://statistics.berkeley.edu/computing/training/tutorials">http://statistics.berkeley.edu/computing/training/tutorials</a></p>
+
+<p>In this tutorial, I will use a <code>$</code> prompt for bash. To follow along,
+you will need to have bash and <code>git</code> installed on your computer. If
+you are using the BCE VM, you should have everything you need
+installed.</p>
+
+<p>If you don't have git installed, please see
+<a href="http://git-scm.com/book/en/v2/Getting-Started-Installing-Git">this</a>
+for help.</p>
+
+<p>You will also need a GitHub account to follow some of the examples
+using git remotes. If you don't already have one, create a educational GitHub
+account <a href="https://github.com/join">here</a>.</p>
+</blockquote>
+
+<h2>
+<a id="user-content-what-is-version-control" class="anchor" href="#what-is-version-control" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>What is version control?</h2>
+
+<p>As a statistician, scientist, or engineer, you will work on projects
+that include code, data, and text. For trivially small and short-lived
+projects, it may suffice to keep track of the various files mentally. As
+the size and duration of your project grows, you will eventually need to
+adopt a system to track everything.</p>
+
+<p>Consider the following example:</p>
+
+<pre><code>$ tree proj1
+proj1
+├── code
+│   ├── analysis.py
+│   ├── eda.py
+│   └── preprocess.py
+├── data
+│   └── blob.dat
+├── figs
+│   └── diagram.png
+├── paper
+│   ├── Makefile
+│   ├── report.bib
+│   └── report.tex
+└── slides
+    └── presentation.md
+
+5 directories, 9 files
+</code></pre>
+
+<p>Above I've displayed the directory tree for a project. Now suppose that
+I have an idea about an alternative analysis to the one currently
+implemented in <code>proj1/code/analysis.py</code>. I could manually backup the
+current analysis script doing something like
+<code>cp analysis.py analysis.py.orig</code>. And then start implementing the new
+analysis in <code>analysis.py</code>. While I am still trying to debug my new
+analysis script, my advisor suggests a third alternative approach, so
+now I create a third version <code>analysis-advisor.py</code>. The new analysis
+methods each require that I conduct different preprocessing steps, so
+now I create the following new files: <code>preprocess-new.py</code> and
+<code>preprocess-advisor.py</code>. Now I just need to remember that
+<code>preprocess-new.py</code> goes with <code>analysis.py</code>, <code>preprocess.py</code> goes with
+<code>analysis.py.orig</code>, and <code>preprocess-advisor.py</code> goes with
+<code>analysis-advisor.py</code>.</p>
+
+<p>It is easy to further complicate this example. For instance, what if you
+are working on this project with several colleagues. Each member will
+want their own copy of the project and you will need a mechanism to
+share the files with one another. You might consider sharing the project
+using something like Dropbox. However, this will require care as it can
+be difficult to determine which changes will be synced when two people
+edit the same file at the same time.</p>
+
+<p>Instead of manually trying to keep track of the changes you've made to
+code, data, and documents as indicated above, version control software
+helps you automate and manage this process. This has several benefits:</p>
+
+<ul>
+<li>  allowing you to easily go back to earlier versions;</li>
+<li>  allowing you to have multiple version you can switch between;</li>
+<li>  allowing you to easily separate tentative new directions into
+different branches of work, which you can later discard or merge
+back into your main line of development;</li>
+<li>  allowing you to share work easily without worrying about conflicts;
+and</li>
+<li>  providing built-in backup.</li>
+</ul>
+
+<p>To see how this works, we will now consider the basic operation of a
+popular and powerful version control system (VCS) called Git. First, we
+will need to develop some basic vocabulary needed to discuss how Git
+works. Then we will see how to use Git locally as a single-user using a
+linear workflow. We will then see how to use branches rather than
+following a simple linear workflow. Finally, we will discuss using
+remotes instead of just working locally including a short discussion of
+collaborative development with one shared remote.</p>
+
+<blockquote>
+<p><strong>note</strong></p>
+
+<p>VCS come in two main architectures: client-server (e.g., CVS,
+Subversion) and distributed (e.g., Mercurial, <strong>Git</strong>). In the
+client-server architecture, there is one master repository and
+everyone working on the repository has their own minimal local copy of
+the master repository. In the distributed model, every repository is a
+complete repository and there are mechanisms for incorporating changes
+from remote repositories into a local repository.</p>
+</blockquote>
+
+<h2>
+<a id="user-content-core-concepts" class="anchor" href="#core-concepts" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Core concepts</h2>
+
+<p>The <strong>working tree</strong> (or directory) is the tree of files you are working
+on in the current directory. In the example above, we started with this
+working tree:</p>
+
+<pre><code>proj1
+├── code
+│   ├── analysis.py
+│   ├── eda.py
+│   └── preprocess.py
+├── data
+│   └── blob.dat
+├── figs
+│   └── diagram.png
+├── paper
+│   ├── Makefile
+│   ├── report.bib
+│   └── report.tex
+└── slides
+    └── presentation.md
+</code></pre>
+
+<p>A <strong>commit</strong> is a <em>snapshot</em> of an entire directory tree at a given
+point in time, some metadata (e.g., reference to previous commits,
+authors name), and an identifier (this is called a hash and will be
+discussed below). Returning to the above example, you would make a
+<strong>commit</strong> corresponding to the original state of the directory tree,
+which I listed. Committing the directory tree as listed above will allow
+us to return to this exact state later (by <strong>checking out</strong> that
+commit---as we will see---the working tree changed to contain exactly
+the files and directories that we originally committed).</p>
+
+<p><a href="/Users/wilsoncai/Dropbox/_David/PH295/Lab/lab6/tutorial-git-basics/figs/commit_anatomy.png" target="_blank"><img src="/Users/wilsoncai/Dropbox/_David/PH295/Lab/lab6/tutorial-git-basics/figs/commit_anatomy.png" alt="Here is a schematic representation of a commit. The commit, which I
+refer to as `98ca9..`, has some metadata (i.e., author name and
+committer name) as well as a pointer to the entire directory
+tree." style="max-width:100%;"></a></p>
+
+<p>Credit: ProGit book, by Scott Chacon, CC License.</p>
+
+<p>A <strong>repository</strong> is essentially a group of <em>linked</em> commits, which form
+a directed acyclic graph (DAG), as well as a set of references to
+specific commits (we refer to these references to commits as <strong>heads</strong>).
+As part of the metadata of each commit, we include references to 0 or
+more parent commits. The initial commit of each repository has 0
+parents. Each subsequent commit is proceeded by 1 or more commits.</p>
+
+<p><a href="/Users/wilsoncai/Dropbox/_David/PH295/Lab/lab6/tutorial-git-basics/figs/threecommits.png" target="_blank"><img src="/Users/wilsoncai/Dropbox/_David/PH295/Lab/lab6/tutorial-git-basics/figs/threecommits.png" alt="This is a schematic representation of three commits in a linear
+workflow. The first commit `98ca9..` has no parents and Snapshot A
+contains all the files and directory structure that was in working tree
+when the project was started. Additional files were added or changed and
+a new commit `34ac2..` was made containing all the files and directories
+corresponding to the new state of the working tree. This new commit
+`34ac2..` has one parent `98ca9..`, which it points to. Continuing in
+this manner, a new commit `f30ab..` is made on top of the second commit
+`34ac2..`." style="max-width:100%;"></a></p>
+
+<p>Credit: ProGit book, by Scott Chacon, CC License.</p>
+
+<p>Again returning to our example, the initial <strong>commit</strong> might correspond
+to the the original state of the directory tree. Then when you begin
+implementing your new analysis method, you don't need to make any copies
+of the previous files (i.e., there is no need to execute
+<code>cp analysis.py analysis.py.orig</code>). Since they are already committed,
+you can always access the original state of the repository by checking
+out the original commit. To proceed you would simply make the necessary
+edits to the files in your directory tree and then when you are
+satisfied with your changes you make a new commit. This new commit will
+correspond to a snapshot of the entire directory tree with all the edits
+you've made to it since the original commit. To keep track of the
+history of the project, the new commit will include a reference to the
+original commit as its parent. Now when your advisor suggests the
+alternative analysis, you could checkout the original commit, implement
+the new method, and commit your changes including a reference to the
+original commit as its sole parent.</p>
+
+<p>Finally, we need to understand how Git keeps track of commits. To
+reference a commit, Git uses a <strong>hash</strong>. Hashing provides a way to have
+a fixed-length identifier for a given set of information, such as a file
+or set of files. The identifier is not guaranteed to be unique, but
+under normal circumstances, it will always be unique.</p>
+
+<p>To make this concrete, consider the following toy "implementation" in R:</p>
+
+<pre><code>library('digest')
+
+# first commit
+data1 &lt;- 'This is the start of my paper.'
+meta1 &lt;- 'date: 8/20/15'
+hash1 &lt;- digest(c(data1, meta1), algo="sha1")
+
+# second commit, linked to the first
+data2 &lt;- 'Some more text in my paper...'
+meta2 &lt;- 'date: 8/20/15'
+# Note we add the parent hash here!
+hash2 &lt;- digest(c(data2, meta2, hash1), algo="sha1")
+</code></pre>
+
+<p>The first hash is a cryptographic signature of the content of the commit
+(<code>data1</code>) and its metadata (<code>meta1</code>). Since this is the first commit to
+the repository, there is no parent commit that proceeds it. However, the
+second hash is a cryptographic signature of the content of the commit
+(<code>data2</code>) and its metadata (<code>meta2</code>) and---importantly---the first hash
+(<code>hash1</code>).</p>
+
+<p>And here it is in Python:</p>
+
+<pre><code>import sha
+
+# first commit
+data1 = 'This is the start of my paper.'
+meta1 = 'date: 8/20/15'
+hash1 = sha.sha(data1 + meta1).hexdigest()
+
+# second commit, linked to the first
+data2 = 'Some more text in my paper...'
+meta2 = 'date: 8/20/15'
+# Note we add the parent hash here!
+hash2 = sha.sha(data2 + meta2 + hash1).hexdigest()
+</code></pre>
+
+<p>Now that we have developed some basic vocabulary, let's start using Git.
+To begin, we will use Git in the simplest way possible---as a
+single-user working linearly with no remotes.</p>
+
+<blockquote>
+<p><strong>note</strong></p>
+
+<p>If you haven't done so already, you will want to configure Git before
+proceeding. You will want to do something like the following from your
+Bash shell:</p>
+
+<pre><code>$ git config --global user.name "Jarrod Millman"
+$ git config --global user.email "millman@berkeley.edu"
+$ git config --global core.editor /usr/bin/gedit
+</code></pre>
+
+<p>The first two lines tell Git who you are (obviously you should use
+your own name and email address rather than mine). The final command
+tells Git which text editor you wish to use. You should use whatever
+text editor you prefer. For instance, I use <code>/usr/bin/vim</code>. The most
+popular text editors on Linux are <code>vim</code> and <code>emacs</code>. If you aren't
+familiar with them at this point, you will probably want to use a
+simple text editor like <code>gedit</code>, which should already be installed on
+your BCE VM. You can learn more about <code>gedit</code> here:
+<a href="https://help.ubuntu.com/community/gedit">https://help.ubuntu.com/community/gedit</a></p>
+</blockquote>
+
+<h2>
+<a id="user-content-local-single-user-linear-workflow" class="anchor" href="#local-single-user-linear-workflow" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Local, single-user, linear workflow</h2>
+
+<p>From a Bash shell, type <code>git</code> (or <code>git help</code>) to see a list of the
+'core' commands, which will look something like this:</p>
+
+<pre><code>$ git
+usage: git &lt;command&gt; [&lt;args&gt;]
+
+The most commonly used git commands are:
+   add        Add file contents to the index
+   config     Get and set options
+   clone      Clone a repository
+   commit     Record changes to the repository
+   init       Create an empty Git repository
+   log        Show commit logs
+   push       Update remote 
+   status     Show the working tree status
+</code></pre>
+
+<p>You will see more commands than this, but these are the ones we cover in
+the remainder of this tutorial.</p>
+
+<p>There are two ways to get a repository. First you can <code>clone</code> an
+existing repository. Second you can create a new one.</p>
+
+<p>In this section, you will see how to create a new empty repository, add
+content, and commit your work to repository. You will also see how to
+look at a log of what you've done, see what you've changed, as well as
+delete and rename files.</p>
+
+<h3>
+<a id="user-content-git-init-create-an-empty-repository" class="anchor" href="#git-init-create-an-empty-repository" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>git init</code>: create an empty repository</h3>
+
+<p>First create an empty repository using the <code>init</code> command:</p>
+
+<pre><code>$ cd ~/src
+$ git init demo
+</code></pre>
+
+<p>Note that I am working in my <code>~/src</code> directory. It is common to use a
+specific directory for all your local repositories. I tend to use <code>src</code>,
+but you might use <code>code</code>, <code>vc</code>, <code>work</code>, or something similar.</p>
+
+<p>Let's look at what git did:</p>
+
+<pre><code>$ cd demo
+$ ls -la
+$ ls -l .git
+</code></pre>
+
+<p>The <code>git init demo</code> command should have created a new directory called
+<code>demo</code> in your <code>~/src</code> directory. Inside <code>~/src/demo</code> you will see
+another directory <code>.git</code>. The <code>.git</code> directory is where git stores the
+repository. Every time you stage some work or commit it, a snapshot of
+your working tree is stored in the <code>.git</code> directory. You should avoid
+modifying this directory manually. Since all the repository information
+is stored in the <code>.git</code> directory, you can turn your working tree back
+into a normal directory tree by deleting the <code>.git</code> directory.</p>
+
+<h3>
+<a id="user-content-git-add-add-content-to-the-staging-area" class="anchor" href="#git-add-add-content-to-the-staging-area" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>git add</code>: add content to the staging area</h3>
+
+<p>Now let's edit our first file in the test directory with a text editor.
+I'm doing it programmatically here for automation purposes, but you'd
+normally be editing by hand:</p>
+
+<pre><code>$ echo "My first bit of text" &gt; file1.txt
+</code></pre>
+
+<p>Now we can tell git about this new file using the <code>add</code> command:</p>
+
+<pre><code>$ git add file1.txt
+</code></pre>
+
+<p>We can now ask git about what happened with <code>status</code>:</p>
+
+<pre><code>$ git status
+</code></pre>
+
+<p>You should now see that <code>file1.txt</code> has been added to the staging area
+and is ready to be committed.</p>
+
+<h3>
+<a id="user-content-git-commit-permanently-record-our-changes-in-the-repository" class="anchor" href="#git-commit-permanently-record-our-changes-in-the-repository" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>git commit</code>: permanently record our changes in the repository</h3>
+
+<p>Now we are ready to commit our changes:</p>
+
+<pre><code>$ git commit -m "This is our first commit"
+</code></pre>
+
+<p>In the commit above, we used the <code>-m</code> flag to specify a message at the
+command line. If we don't do that, git will open the editor we specified
+in our configuration above and require that we enter a message. By
+default, git refuses to record changes that don't have a message to go
+along with them (though you can obviously 'cheat' by using an empty or
+meaningless string: git only tries to facilitate best practices, it's
+not your nanny).</p>
+
+<p>While many people use the <code>-m</code> flag routinely, I would recommend
+configuring your editor and then using it to add your commit message.
+This has the advantage that while you are writing your commit message,
+you can see the list of files that you are committing. While this may
+seem inconsequential, I've found that this practice is helpful and
+doesn't slow me down.</p>
+
+<h3>
+<a id="user-content-git-log-what-has-been-committed-so-far" class="anchor" href="#git-log-what-has-been-committed-so-far" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>git log</code>: what has been committed so far</h3>
+
+<p>To see a log of the commits:</p>
+
+<pre><code>$ git log
+</code></pre>
+
+<h3>
+<a id="user-content-git-diff-what-have-i-changed" class="anchor" href="#git-diff-what-have-i-changed" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>git diff</code>: what have I changed?</h3>
+
+<p>Let's do a little bit more work. Again, in practice you'll be editing
+the files by hand, here we do it via shell commands for the sake of
+automation (and therefore the reproducibility of this tutorial!)</p>
+
+<pre><code>$ echo "And now some more text..." &gt;&gt; file1.txt
+</code></pre>
+
+<p>And now we can ask git what is different:</p>
+
+<pre><code>$ git diff
+</code></pre>
+
+<h3>
+<a id="user-content-the-cycle-of-git-work-add-commit-" class="anchor" href="#the-cycle-of-git-work-add-commit-" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>The cycle of git: work, add, commit, ...</h3>
+
+<pre><code>$ echo "Great progress ..." &gt;&gt; file1.txt
+$ git add file1.txt
+$ git commit -m "Great progress on this matter."
+</code></pre>
+
+<p>While the basic pattern is <em>work, add, commit, and repeat</em>, I tend to
+repeatedly add my work to the staging area before I finally commit it.
+This allows me to effectively keep saving my work, but only committing
+it once I have finished and tested a chunk of work. The importance of
+keeping track of your changes is not because you want to track the
+possibly circuitous route you happened to take while implementing a new
+feature in your code or revising your text. Rather, the goal is to track
+the logical and conceptual steps that led to your new feature or
+revision. As you learn more about git, you will learn how to rebase your
+changes on a new history, to rewrite your history, as well as how to
+break your commits into many commits. These features allow you to
+carefully construct the history of your changes into a comprehensible
+account that leads the reader of your history to an understanding of
+what you have done. This makes it easier for you to understand what
+you've done when you try to figure it out months later. It also makes it
+easier for your collaborators to understand what you've done.</p>
+
+<p>Understanding the difference between the working tree, the staging area
+(or index), and the repository can be confusing at first. The <em>working
+tree</em> or <em>working directory</em> is your local directory on the filesystem.
+The staging area (or <em>index</em>) reflects your <code>git add</code>, <code>git rm</code>, etc.
+changes that have been staged but not committed. The repository reflects
+your commits.</p>
+
+<p>Consider the schematic representation below. You work in your working
+tree (or directory). Periodically, as you complete little chunks of
+work, you add your work to the staging area. (Generally, speaking a
+staging area is a place where you prepare to do something. For instance,
+if you wish to go on a hike in the East Bay Regional Park system with
+some of your friends, you could meet in a staging area---a parking lot
+beside an entrance to one of the paths. The purpose of the staging area
+in this instance is to provide a place where you and your friends can
+coordinate before beginning your walk.) Once you've got a logical chunk
+of work completed and staged, you can then commit it. Each commit has a
+unique hash. You can go back to the exact snapshot of your working tree
+at the time you committed it by checking it out using the <code>git checkout</code>
+command, which we will discuss below.</p>
+
+
+
+<h3>
+<a id="user-content-git-log-revisited" class="anchor" href="#git-log-revisited" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>git log</code> revisited</h3>
+
+<p>First, let's see what the log shows us now:</p>
+
+<pre><code>$ git log
+</code></pre>
+
+<p>Sometimes it's handy to see a very summarized version of the log:</p>
+
+<pre><code>$ git log --oneline --topo-order --graph
+</code></pre>
+
+<p>Git supports <em>aliases:</em> new names given to command combinations. Let's
+make this handy shortlog an alias, so we only have to type <code>git slog</code>
+and see this compact log:</p>
+
+<pre><code># We create our alias (this saves it in git's permanent configuration file):
+$ git config --global alias.slog "log --oneline --topo-order --graph"
+# And now we can use it git slog
+</code></pre>
+
+<h3>
+<a id="user-content-git-mv-and-rm-moving-and-removing-files" class="anchor" href="#git-mv-and-rm-moving-and-removing-files" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>git mv</code> and <code>rm</code>: moving and removing files</h3>
+
+<p>While <code>git add</code> is used to add files to the list git tracks, we must
+also tell it if we want their names to change or for it to stop tracking
+them. In familiar Unix fashion, the <code>mv</code> and <code>rm</code> git commands do
+precisely this:</p>
+
+<pre><code>$ git mv file1.txt file-newname.txt
+$ git status
+</code></pre>
+
+<p>Note that these changes must be committed too, to become permanent! In
+git's world, until something hasn't been committed, it isn't permanently
+recorded anywhere:</p>
+
+<pre><code>$ git commit -m "I like this new name better"
+$ git slog
+</code></pre>
+
+<p>And <code>git rm</code> works in a similar fashion.</p>
+
+<h2>
+<a id="user-content-local-single-user-branching-workflow" class="anchor" href="#local-single-user-branching-workflow" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Local, single-user, branching workflow</h2>
+
+<p>To understand what a Git <strong>branch</strong> is, we first need to revisit the
+idea of a <strong>head</strong>. As discussed above, Git labels every commit with
+cryptographic signature called a hash. These hashes can be considered to
+uniquely identify every commit and are used to verify that the contents
+of the commit and history of the commit are correct. While there are
+many advantages to using these hashes to label the commits, it is
+unlikely that you will remember these hashes. This is where heads come
+into play. A head is an easy to remember label (e.g., <code>HEAD</code>, <code>master</code>,
+<code>feature1</code>) that references a commit.</p>
+
+<p><a href="/Users/wilsoncai/Dropbox/_David/PH295/Lab/lab6/tutorial-git-basics/figs/masterbranch.png" target="_blank"><img src="/Users/wilsoncai/Dropbox/_David/PH295/Lab/lab6/tutorial-git-basics/figs/masterbranch.png" alt="By default every repository has a head called `master`. In this figure
+`master` refers to the commit whose has begins `f30ab`. This allows you
+to refer to the commit by the easy to remember name `master` rather than
+`f30ab`." style="max-width:100%;"></a></p>
+
+<p>Credit: ProGit book, by Scott Chacon, CC License.</p>
+
+<p>A repository can contain any number of heads. At any point in time, your
+current working tree will correspond to a specific commit. By
+convention, we refer to this commit with the name <code>HEAD</code> (note the use
+of all capital letters to distinguish this from the generic notion of
+head).</p>
+
+<p>In Git, the notions of branch and head are essentially identical. Each
+branch is associated with exactly one head and each head corresponds to
+one branch. However, we use the term head to refer exclusively to a
+label on exactly one commit; while the term branch may also sometimes be
+used to refer not only to the commit labeled by the head but that commit
+and all the commits that proceed it in the repository.</p>
+
+<p><a href="/Users/wilsoncai/Dropbox/_David/PH295/Lab/lab6/tutorial-git-basics/figs/HEAD_testing.png" target="_blank"><img src="/Users/wilsoncai/Dropbox/_David/PH295/Lab/lab6/tutorial-git-basics/figs/HEAD_testing.png" alt="In this example there are two heads or branches, *master* and
+*testing*, and *testing* is the currently active branch since it's what
+*HEAD* points to." style="max-width:100%;"></a></p>
+
+<p>Credit: ProGit book, by Scott Chacon, CC License.</p>
+
+<p>Once new commits are made on a branch, HEAD and the branch label move
+with the new commits:</p>
+
+<p><a href="/Users/wilsoncai/Dropbox/_David/PH295/Lab/lab6/tutorial-git-basics/figs/branchcommit.png" target="_blank"><img src="/Users/wilsoncai/Dropbox/_David/PH295/Lab/lab6/tutorial-git-basics/figs/branchcommit.png" alt="In this example (notice that HEAD is not shown), the branch master and
+iss53 share a common history up to commit C2. However, the branch iss53
+differs from master as it has the additional commit
+C3." style="max-width:100%;"></a></p>
+
+<p>Credit: ProGit book, by Scott Chacon, CC License.</p>
+
+<p>This allows the history of both branches to diverge. For instance, your
+master branch may be were you integrate new features and bug fixes into
+the main trunk of development. If you have a bug report (perhaps labeled
+issue 53) that you are trying to fix, you might create a branch (labeled
+iss53). While you are preparing a fix for issue 53, the main trunk gains
+another bug fix or feature.</p>
+
+<p><a href="/Users/wilsoncai/Dropbox/_David/PH295/Lab/lab6/tutorial-git-basics/figs/mergescenario.png" target="_blank"><img src="/Users/wilsoncai/Dropbox/_David/PH295/Lab/lab6/tutorial-git-basics/figs/mergescenario.png" alt="Here both master and iss53 have a shared history up to the commit C2.
+However they both have commits that the other lacks after their shared
+ancestor." style="max-width:100%;"></a></p>
+
+<p>Credit: ProGit book, by Scott Chacon, CC License.</p>
+
+<p>Once you've completed fixing issue 53 on branch iss53, you want to
+integrate your work back into the main trunk represented by the master
+branch. The process of integrating your work is called merging and often
+happens automatically. Once the iss53 branch has been merged back into
+the master branch, you can continue with a unified line of development:</p>
+
+<p><a href="/Users/wilsoncai/Dropbox/_David/PH295/Lab/lab6/tutorial-git-basics/figs/mergeaftermath.png" target="_blank"><img src="/Users/wilsoncai/Dropbox/_David/PH295/Lab/lab6/tutorial-git-basics/figs/mergeaftermath.png" alt="The result of merging the iss53 branch into the master branch. At this
+point, you could safely delete the iss53 branch, which would result in
+removing the label iss53 pointing to commit C5. Credit: ProGit book, by
+Scott Chacon, CC License." style="max-width:100%;"></a></p>
+
+<p>Let's now illustrate all of this with a concrete example. Let's get our
+bearings first:</p>
+
+<pre><code>$ git status
+$ ls
+</code></pre>
+
+<p>We are now going to try two different routes of development: on the
+<code>master</code> branch we will add one file and on the <code>experiment</code> branch,
+which we will create, we will add a different one. We will then merge
+the experimental branch into <code>master</code>.</p>
+
+<p>Create and work on an experimental branch:</p>
+
+<pre><code>$ git branch experiment
+$ git checkout experiment
+$ echo "Some crazy idea" &gt; experiment.txt
+$ git add experiment.txt
+$ git commit -m "Trying something new"
+$ git slog
+</code></pre>
+
+<p>Work on the master branch:</p>
+
+<pre><code>$ git checkout master
+$ git slog
+$ echo "Work goes on in master..." &gt;&gt; file-newname.txt
+$ git add file-newname.txt
+$ git commit -m "The mainline keeps moving"
+$ git slog
+</code></pre>
+
+<p>Now merge experimental branch:</p>
+
+<pre><code>$ ls
+$ git merge experiment
+$ git slog
+</code></pre>
+
+<blockquote>
+<p><strong>note</strong></p>
+
+<p>We've seen that Git has multiple ways for referring to a commit.</p>
+
+<ol>
+<li> Using the full hash, which you can find using <code>git log</code>
+</li>
+<li> Using the first few characters of the hash (as long as there is no
+ambiguity)</li>
+<li> Using a head label (e.g., <code>HEAD</code> or <code>master</code>)</li>
+<li> Relative to a specified commit (e.g., <code>HEAD^</code> is the parent of the
+current head commit)</li>
+</ol>
+</blockquote>
+
+<h2>
+<a id="user-content-using-remotes-as-a-single-user" class="anchor" href="#using-remotes-as-a-single-user" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Using remotes as a single user</h2>
+
+<p>We are now going to introduce the concept of a <strong>remote</strong> repository: a
+pointer to another copy of the repository that lives on a different
+location. This can be simply a different path on the filesystem or a
+server on the internet.</p>
+
+<p>For this discussion, we'll be using remotes hosted on the
+<a href="http://github.com">GitHub.com</a> service, but you can equally use other
+services like <a href="http://bitbucket.org">BitBucket</a> or
+<a href="http://gitorious.org">Gitorious</a> as well as host your own.</p>
+
+<pre><code>$ git remote -v
+</code></pre>
+
+<p>Since the above cell didn't produce any output after the <code>git remote -v</code>
+call, it means we have no remote repositories configured. We will now
+proceed to do so.</p>
+
+<p>Once logged into GitHub, go to the <a href="https://github.com/new">new repository
+page</a> and make a repository called <code>test</code>. Do
+<strong>not</strong> check the box that says
+<code>Initialize this repository with a README</code>, since we already have an
+existing repository here. That option is useful when you're starting
+first at GitHub and don't have a repository made already on a local
+computer.</p>
+
+<p>We can now follow the instructions from the next page:</p>
+
+<pre><code>$ git remote add origin git@github.com:wilsoncai1992/TESTGIT.git
+$ git push -u origin master
+</code></pre>
+
+<p>Let's see the remote situation again:</p>
+
+<pre><code>$ git remote -v
+</code></pre>
+
+<p>We can now <a href="https://github.com/wilsoncai1992/TESTGIT">see this repository publicly on
+GitHub</a>.</p>
+
+<p>Let's see how this can be useful for backup and syncing work between two
+different computers. I'll simulate a 2nd computer by working in a
+different directory...</p>
+
+<pre><code>$ cd ~/src/
+</code></pre>
+
+<p>Here I clone my 'test' repository but with a different name, TESTGIT2, to
+simulate a 2nd computer:</p>
+
+<pre><code>$ git clone git@github.com:wilsoncai1992/TESTGIT.git TESTGIT2
+$ cd TESTGIT2
+$ pwd
+$ git remote -v
+</code></pre>
+
+<p>Let's now make some changes in one 'computer' and synchronize them on
+the second.</p>
+
+<p>First I switch directories to simulate working on computer #2:</p>
+
+<pre><code>$ cd ~/src/TESTGIT2
+$ echo "More new content on my experiment" &gt;&gt; experiment.txt
+$ git add experiment.txt
+$ git commit -m "More work, on machine #2"
+</code></pre>
+
+<p>Now we put this new work up on the GitHub server so it's available from
+the internet:</p>
+
+<pre><code>$ git push
+</code></pre>
+
+<p>Now let's fetch that work from machine #1. Again, I first change
+directories to simulate working from my other machine:</p>
+
+<pre><code>$ cd ~/src/demo
+$ git pull
+</code></pre>
+
+<h2>
+<a id="user-content-conflict-management" class="anchor" href="#conflict-management" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Conflict management</h2>
+
+<p>While git is very good at merging, if two different branches modify the
+same file in the same location, it simply can't decide which change
+should prevail. At that point, human intervention is necessary to make
+the decision. Git will help you by marking the location in the file that
+has a problem, but it's up to you to resolve the conflict. Let's see how
+that works by intentionally creating a conflict.</p>
+
+<p>We start by creating a branch and making a change to our experiment
+file:</p>
+
+<pre><code>$ git branch trouble
+$ git checkout trouble
+$ echo "This is going to be a problem..." &gt;&gt; experiment.txt
+$ git add experiment.txt
+$ git commit -m "Changes in the trouble branch"
+</code></pre>
+
+<p>And now we go back to the master branch, where we change the <em>same</em>
+file:</p>
+
+<pre><code>$ git checkout master
+$ echo "More work on the master branch..." &gt;&gt; experiment.txt
+$ git add experiment.txt
+$ git commit -m "Mainline work"``
+</code></pre>
+
+<p>So now let's see what happens if we try to merge the <code>trouble</code> branch
+into <code>master</code>:</p>
+
+<pre><code>$ git merge trouble
+</code></pre>
+
+<p>Let's see what git has put into our file:</p>
+
+<pre><code>$ cat experiment.txt
+Some crazy idea
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+More work on the master branch...
+=======
+This is going to be a problem...
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; trouble
+</code></pre>
+
+<p>At this point, we go into the file with a text editor, decide which
+changes to keep, and make a new commit that records our decision. To
+automate my edits, I use the <code>sed</code> command:</p>
+
+<pre><code>$ sed -i '/^&lt;/d' experiment.txt
+$ sed -i '/^&gt;/d' experiment.txt
+$ sed -i '/^=/d' experiment.txt
+</code></pre>
+
+<p>I've now made the edits, in this case I decided that both pieces of text
+were useful, so I just accepted both additions:</p>
+
+<pre><code>$ cat experiment.txt
+Some crazy idea
+More work on the master branch...
+This is going to be a problem..
+</code></pre>
+
+<p>Let's then make our new commit:</p>
+
+<pre><code>$ git add experiment.txt
+$ git commit -m "Completed merge of trouble, fixing conflicts along the way"
+$ git slog
+</code></pre>
+
+<blockquote>
+<p><strong>note</strong></p>
+
+<p>While it's a good idea to understand the basics of fixing merge
+conflicts by hand, in some cases you may find the use of an automated
+tool useful. Git supports multiple <a href="https://www.kernel.org/pub/software/scm/git/docs/git-mergetool.html">merge
+tools</a>:
+a merge tool is a piece of software that conforms to a basic interface
+and knows how to merge two files into a new one. Since these are
+typically graphical tools, there are various to choose from for the
+different operating systems, and as long as they obey a basic command
+structure, git can work with any of them.</p>
+</blockquote>
+
+<h3>
+<a id="user-content-exercise-single-remote-with-shared-access" class="anchor" href="#exercise-single-remote-with-shared-access" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Exercise: Single remote with shared access</h3>
+
+<p>For this exercise, you are going to set up a shared collaboration with
+one partner (the person sitting next to you). This will show the basic
+workflow of collaborating on a project with a small team where everyone
+has write privileges to the same repository.</p>
+
+<p>We will have two people, let’s call them Alice and Bob, sharing a
+repository. Alice will be the owner of the repository and she will give
+Bob write privileges.</p>
+
+<p>We begin with a simple synchronization example, much like we just did
+above, but now between two people instead of one person. Otherwise it’s
+the same:</p>
+
+<ul>
+<li>  Bob clones Alice's repository.</li>
+<li>  Bob makes changes to a file and commits them locally.</li>
+<li>  Bob pushes his changes to GitHub.</li>
+<li>  Alice pulls Bob's changes into her own repository.</li>
+</ul>
+
+<p>Next, we will have both parties make non-conflicting changes each, and
+commit them locally. Then both try to push their changes:</p>
+
+<ul>
+<li>  Alice adds a new file, <code>alice.txt</code> to the repository and commits.</li>
+<li>  Bob adds <code>bob.txt</code> and commits.</li>
+<li>  Alice pushes to GitHub.</li>
+<li>  Bob tries to push to GitHub.</li>
+</ul>
+
+<p>What happened? Read the error message and hint provided by git to see if
+you can figure it out.</p>
+
+<p>Since Alice and Bob are working on the same branch of the repository,
+the problem is that Bob's branch doesn't have Alice's most recent
+commit, which the branch on GitHub has since Alice pushed it already. In
+order to push a branch to a remote, you have to already have the entire
+history on the remote in your local repository. The solution is for Bob
+to first pull the changes (pull in git is really fetch+merge), and then
+push again. When Bob pulls from his GitHub remote, he will merge Alice's
+history into his repository. Now when he attempts to push, his
+repository contains all the history that the remote repository on GitHub
+has.</p>
+
+<h2>
+<a id="user-content-learn-more" class="anchor" href="#learn-more" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Learn more</h2>
+
+<ul>
+<li>  <a href="http://nyuccl.org/pages/GitTutorial/">Git for Scientists: A
+Tutorial</a>
+</li>
+<li>  <a href="http://matthew-brett.github.io/pydagogue/gitwash_build.html">Gitwash: workflow for scientific Python
+projects</a>
+</li>
+<li>  <a href="http://pcottle.github.io/learnGitBranching/">Git branching demo</a>
+</li>
+</ul>
+</article></body></html>
