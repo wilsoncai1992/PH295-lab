@@ -242,9 +242,9 @@ single-user working linearly with no remotes.
 > proceeding. You will want to do something like the following from your
 > Bash shell:
 >
->     $ git config --global user.name "Jarrod Millman"
->     $ git config --global user.email "millman@berkeley.edu"
->     $ git config --global core.editor /usr/bin/gedit
+>     $ git config --global user.name "Wilson Cai"
+>     $ git config --global user.email "wcai@berkeley.edu"
+>     $ git config --global core.editor /usr/bin/vim
 
 > The first two lines tell Git who you are (obviously you should use
 > your own name and email address rather than mine). The final command

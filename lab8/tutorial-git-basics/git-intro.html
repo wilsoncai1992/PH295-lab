@@ -878,7 +878,7 @@ us to return to this exact state later (by <strong>checking out</strong> that
 commit---as we will see---the working tree changed to contain exactly
 the files and directories that we originally committed).</p>
 
-<p><a href="/Users/wilsoncai/Dropbox/_David/PH295/Lab/lab6/tutorial-git-basics/figs/commit_anatomy.png" target="_blank"><img src="/Users/wilsoncai/Dropbox/_David/PH295/Lab/lab6/tutorial-git-basics/figs/commit_anatomy.png" alt="Here is a schematic representation of a commit. The commit, which I
+<p><a href="/Users/wilsoncai/Downloads/Github/PH295-lab/lab8/tutorial-git-basics/figs/commit_anatomy.png" target="_blank"><img src="/Users/wilsoncai/Downloads/Github/PH295-lab/lab8/tutorial-git-basics/figs/commit_anatomy.png" alt="Here is a schematic representation of a commit. The commit, which I
 refer to as `98ca9..`, has some metadata (i.e., author name and
 committer name) as well as a pointer to the entire directory
 tree." style="max-width:100%;"></a></p>
@@ -892,7 +892,7 @@ As part of the metadata of each commit, we include references to 0 or
 more parent commits. The initial commit of each repository has 0
 parents. Each subsequent commit is proceeded by 1 or more commits.</p>
 
-<p><a href="/Users/wilsoncai/Dropbox/_David/PH295/Lab/lab6/tutorial-git-basics/figs/threecommits.png" target="_blank"><img src="/Users/wilsoncai/Dropbox/_David/PH295/Lab/lab6/tutorial-git-basics/figs/threecommits.png" alt="This is a schematic representation of three commits in a linear
+<p><a href="/Users/wilsoncai/Downloads/Github/PH295-lab/lab8/tutorial-git-basics/figs/threecommits.png" target="_blank"><img src="/Users/wilsoncai/Downloads/Github/PH295-lab/lab8/tutorial-git-basics/figs/threecommits.png" alt="This is a schematic representation of three commits in a linear
 workflow. The first commit `98ca9..` has no parents and Snapshot A
 contains all the files and directory structure that was in working tree
 when the project was started. Additional files were added or changed and
@@ -977,9 +977,9 @@ single-user working linearly with no remotes.</p>
 proceeding. You will want to do something like the following from your
 Bash shell:</p>
 
-<pre><code>$ git config --global user.name "Jarrod Millman"
-$ git config --global user.email "millman@berkeley.edu"
-$ git config --global core.editor /usr/bin/gedit
+<pre><code>$ git config --global user.name "Wilson Cai"
+$ git config --global user.email "wcai@berkeley.edu"
+$ git config --global core.editor /usr/bin/vim
 </code></pre>
 
 <p>The first two lines tell Git who you are (obviously you should use
@@ -1227,7 +1227,7 @@ unlikely that you will remember these hashes. This is where heads come
 into play. A head is an easy to remember label (e.g., <code>HEAD</code>, <code>master</code>,
 <code>feature1</code>) that references a commit.</p>
 
-<p><a href="/Users/wilsoncai/Dropbox/_David/PH295/Lab/lab6/tutorial-git-basics/figs/masterbranch.png" target="_blank"><img src="/Users/wilsoncai/Dropbox/_David/PH295/Lab/lab6/tutorial-git-basics/figs/masterbranch.png" alt="By default every repository has a head called `master`. In this figure
+<p><a href="/Users/wilsoncai/Downloads/Github/PH295-lab/lab8/tutorial-git-basics/figs/masterbranch.png" target="_blank"><img src="/Users/wilsoncai/Downloads/Github/PH295-lab/lab8/tutorial-git-basics/figs/masterbranch.png" alt="By default every repository has a head called `master`. In this figure
 `master` refers to the commit whose has begins `f30ab`. This allows you
 to refer to the commit by the easy to remember name `master` rather than
 `f30ab`." style="max-width:100%;"></a></p>
@@ -1247,7 +1247,7 @@ label on exactly one commit; while the term branch may also sometimes be
 used to refer not only to the commit labeled by the head but that commit
 and all the commits that proceed it in the repository.</p>
 
-<p><a href="/Users/wilsoncai/Dropbox/_David/PH295/Lab/lab6/tutorial-git-basics/figs/HEAD_testing.png" target="_blank"><img src="/Users/wilsoncai/Dropbox/_David/PH295/Lab/lab6/tutorial-git-basics/figs/HEAD_testing.png" alt="In this example there are two heads or branches, *master* and
+<p><a href="/Users/wilsoncai/Downloads/Github/PH295-lab/lab8/tutorial-git-basics/figs/HEAD_testing.png" target="_blank"><img src="/Users/wilsoncai/Downloads/Github/PH295-lab/lab8/tutorial-git-basics/figs/HEAD_testing.png" alt="In this example there are two heads or branches, *master* and
 *testing*, and *testing* is the currently active branch since it's what
 *HEAD* points to." style="max-width:100%;"></a></p>
 
@@ -1256,7 +1256,7 @@ and all the commits that proceed it in the repository.</p>
 <p>Once new commits are made on a branch, HEAD and the branch label move
 with the new commits:</p>
 
-<p><a href="/Users/wilsoncai/Dropbox/_David/PH295/Lab/lab6/tutorial-git-basics/figs/branchcommit.png" target="_blank"><img src="/Users/wilsoncai/Dropbox/_David/PH295/Lab/lab6/tutorial-git-basics/figs/branchcommit.png" alt="In this example (notice that HEAD is not shown), the branch master and
+<p><a href="/Users/wilsoncai/Downloads/Github/PH295-lab/lab8/tutorial-git-basics/figs/branchcommit.png" target="_blank"><img src="/Users/wilsoncai/Downloads/Github/PH295-lab/lab8/tutorial-git-basics/figs/branchcommit.png" alt="In this example (notice that HEAD is not shown), the branch master and
 iss53 share a common history up to commit C2. However, the branch iss53
 differs from master as it has the additional commit
 C3." style="max-width:100%;"></a></p>
@@ -1270,7 +1270,7 @@ issue 53) that you are trying to fix, you might create a branch (labeled
 iss53). While you are preparing a fix for issue 53, the main trunk gains
 another bug fix or feature.</p>
 
-<p><a href="/Users/wilsoncai/Dropbox/_David/PH295/Lab/lab6/tutorial-git-basics/figs/mergescenario.png" target="_blank"><img src="/Users/wilsoncai/Dropbox/_David/PH295/Lab/lab6/tutorial-git-basics/figs/mergescenario.png" alt="Here both master and iss53 have a shared history up to the commit C2.
+<p><a href="/Users/wilsoncai/Downloads/Github/PH295-lab/lab8/tutorial-git-basics/figs/mergescenario.png" target="_blank"><img src="/Users/wilsoncai/Downloads/Github/PH295-lab/lab8/tutorial-git-basics/figs/mergescenario.png" alt="Here both master and iss53 have a shared history up to the commit C2.
 However they both have commits that the other lacks after their shared
 ancestor." style="max-width:100%;"></a></p>
 
@@ -1282,7 +1282,7 @@ branch. The process of integrating your work is called merging and often
 happens automatically. Once the iss53 branch has been merged back into
 the master branch, you can continue with a unified line of development:</p>
 
-<p><a href="/Users/wilsoncai/Dropbox/_David/PH295/Lab/lab6/tutorial-git-basics/figs/mergeaftermath.png" target="_blank"><img src="/Users/wilsoncai/Dropbox/_David/PH295/Lab/lab6/tutorial-git-basics/figs/mergeaftermath.png" alt="The result of merging the iss53 branch into the master branch. At this
+<p><a href="/Users/wilsoncai/Downloads/Github/PH295-lab/lab8/tutorial-git-basics/figs/mergeaftermath.png" target="_blank"><img src="/Users/wilsoncai/Downloads/Github/PH295-lab/lab8/tutorial-git-basics/figs/mergeaftermath.png" alt="The result of merging the iss53 branch into the master branch. At this
 point, you could safely delete the iss53 branch, which would result in
 removing the label iss53 pointing to commit C5. Credit: ProGit book, by
 Scott Chacon, CC License." style="max-width:100%;"></a></p>
