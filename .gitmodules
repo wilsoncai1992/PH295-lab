@@ -2,6 +2,3 @@
 	path = lab5
 	url = https://github.com/benkeser/sllecture.git
 	branch = gh-pages
-[submodule "lab9"]
-	path = lab9
-	url = https://github.com/berkeley-scf/ph295-parallel-2016
