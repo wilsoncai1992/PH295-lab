@@ -13,8 +13,8 @@
 - Week 9: h20ensemble (Chris Kennedy) + SuperLearner: Part III (David)
 - Week 10: Git + Amazon EC2
 - Week 11: Guest speaker 2 (BRC) -- Savio & parallelization
-- Week 12: TBA
-- Week 13: TBA
+- Week 12: TMLE
+- Week 13: Thanksgiving (No Lab)
 
 
 ## License
