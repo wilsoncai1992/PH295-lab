@@ -14,7 +14,7 @@
 - Week 10: Git + Amazon EC2
 - Week 11: Guest speaker 2 (BRC) -- Savio & parallelization
 - Week 12: TMLE
-- Week 13: Thanksgiving (No Lab)
+- Week 13: No Lab (Thanksgiving)
 
 
 ## License
